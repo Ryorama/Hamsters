@@ -1,23 +1,19 @@
 package com.starfish_studios.hamsters.entity.common;
+
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 
-// Credit the Bob Mowzie
-// https://github.com/BobMowzie/MowziesMobs/blob/master/src/main/java/com/bobmowzie/mowziesmobs/server/entity/SmartBodyHelper.java
 public class SmartBodyHelper extends BodyRotationControl {
+
+    // Credit to Mowzie's Mobs
+
     private static final float MAX_ROTATE = 75;
-
     private static final int HISTORY_SIZE = 10;
-
     private final Mob entity;
-
     private int rotateTime;
-
     private float targetYawHead;
-
     private final double[] histPosX = new double[HISTORY_SIZE];
-
     private final double[] histPosZ = new double[HISTORY_SIZE];
 
     public SmartBodyHelper(Mob entity) {
@@ -27,39 +23,40 @@ public class SmartBodyHelper extends BodyRotationControl {
 
     @Override
     public void clientTick() {
-        for (int i = histPosX.length - 1; i > 0; i--) {
-            histPosX[i] = histPosX[i - 1];
-            histPosZ[i] = histPosZ[i - 1];
+
+        for (int i = this.histPosX.length - 1; i > 0; i--) {
+            this.histPosX[i] = this.histPosX[i - 1];
+            this.histPosZ[i] = this.histPosZ[i - 1];
         }
-        histPosX[0] = entity.getX();
-        histPosZ[0] = entity.getZ();
-        double dx = delta(histPosX);
-        double dz = delta(histPosZ);
+
+        this.histPosX[0] = this.entity.getX();
+        this.histPosZ[0] = this.entity.getZ();
+
+        double dx = delta(this.histPosX);
+        double dz = delta(this.histPosZ);
         double distSq = dx * dx + dz * dz;
+
         if (distSq > 2.5e-7) {
-            boolean canLook = true;
-            if (canLook) {
-                double moveAngle = (float) Mth.atan2(dz, dx) * (180 / (float) Math.PI) - 90;
-                entity.yBodyRot += Mth.wrapDegrees(moveAngle - entity.yBodyRot) * 0.6F;
-                this.targetYawHead = this.entity.yHeadRot;
-                this.rotateTime = 0;
-            }
-            else {
-                super.clientTick();
-            }
-        } else if (entity.getPassengers().isEmpty() || !(entity.getPassengers().get(0) instanceof Mob)) {
+
+            double moveAngle = (float) Mth.atan2(dz, dx) * (180 / (float) Math.PI) - 90;
+            this.entity.yBodyRot += (float) (Mth.wrapDegrees(moveAngle - this.entity.yBodyRot) * 0.6F);
+            this.targetYawHead = this.entity.yHeadRot;
+            this.rotateTime = 0;
+
+        } else if (this.entity.getPassengers().isEmpty() || !(this.entity.getPassengers().get(0) instanceof Mob)) {
+
             float limit = MAX_ROTATE;
-            if (Math.abs(entity.yHeadRot - targetYawHead) > 15) {
-                rotateTime = 0;
-                targetYawHead = entity.yHeadRot;
+
+            if (Math.abs(this.entity.yHeadRot - this.targetYawHead) > 15) {
+                this.rotateTime = 0;
+                this.targetYawHead = entity.yHeadRot;
             } else {
-                rotateTime++;
+                this.rotateTime++;
                 final int speed = 10;
-                if (rotateTime > speed) {
-                    limit = Math.max(1 - (rotateTime - speed) / (float) speed, 0) * MAX_ROTATE;
-                }
+                if (this.rotateTime > speed) limit = Math.max(1 - (this.rotateTime - speed) / (float) speed, 0) * MAX_ROTATE;
             }
-            entity.yBodyRot = approach(entity.yHeadRot, entity.yBodyRot, limit);
+
+            this.entity.yBodyRot = approach(this.entity.yHeadRot, this.entity.yBodyRot, limit);
         }
     }
 
@@ -69,19 +66,14 @@ public class SmartBodyHelper extends BodyRotationControl {
 
     private double mean(double[] arr, int start) {
         double mean = 0;
-        for (int i = 0; i < HISTORY_SIZE / 2; i++) {
-            mean += arr[i + start];
-        }
+        for (int i = 0; i < HISTORY_SIZE / 2; i++) mean += arr[i + start];
         return mean / arr.length;
     }
 
     public static float approach(float target, float current, float limit) {
         float delta = Mth.wrapDegrees(current - target);
-        if (delta < -limit) {
-            delta = -limit;
-        } else if (delta >= limit) {
-            delta = limit;
-        }
+        if (delta < -limit) delta = -limit;
+        else if (delta >= limit) delta = limit;
         return target + delta * 0.55F;
     }
 }

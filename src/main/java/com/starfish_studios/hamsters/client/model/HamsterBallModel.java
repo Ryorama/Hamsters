@@ -1,48 +1,47 @@
 package com.starfish_studios.hamsters.client.model;
 
-import com.mojang.math.Axis;
-import com.starfish_studios.hamsters.entity.Hamster;
+import com.starfish_studios.hamsters.Hamsters;
 import com.starfish_studios.hamsters.entity.HamsterBall;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.core.animatable.model.CoreGeoBone;
 import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 
-import static com.starfish_studios.hamsters.Hamsters.MOD_ID;
-
+@Environment(EnvType.CLIENT)
 public class HamsterBallModel extends DefaultedEntityGeoModel<HamsterBall> {
 
     public HamsterBallModel() {
-        super(new ResourceLocation(MOD_ID, "hamster_ball"), true);
+        super(Hamsters.id("hamster_ball"), true);
     }
 
     @Override
     public ResourceLocation getModelResource(HamsterBall animatable) {
-        return new ResourceLocation(MOD_ID, "geo/entity/hamster_ball.geo.json");
+        return Hamsters.id("geo/entity/hamster_ball.geo.json");
     }
 
     @Override
     public ResourceLocation getTextureResource(HamsterBall animatable) {
-        return new ResourceLocation(MOD_ID, "textures/entity/ball/blue.png");
+        return Hamsters.id("textures/entity/ball/blue.png");
     }
 
     @Override
     public ResourceLocation getAnimationResource(HamsterBall animatable) {
-        return new ResourceLocation(MOD_ID, "animations/hamster_ball.animation.json");
+        return Hamsters.id("animations/hamster_ball.animation.json");
     }
-
 
     @Override
     public RenderType getRenderType(HamsterBall animatable, ResourceLocation texture) {
         return RenderType.entityTranslucent(texture);
     }
 
+    @SuppressWarnings("all")
     @Override
     public void setCustomAnimations(HamsterBall animatable, long instanceId, AnimationState<HamsterBall> animationState) {
+
         super.setCustomAnimations(animatable, instanceId, animationState);
-
-
 
         if (animationState == null) return;
 
@@ -52,6 +51,4 @@ public class HamsterBallModel extends DefaultedEntityGeoModel<HamsterBall> {
 //            root.setRotX(15);
 //        }
     }
-
-
 }

@@ -2,16 +2,14 @@ package com.starfish_studios.hamsters.entity.common;
 
 import com.starfish_studios.hamsters.entity.Hamster;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-
 import java.util.EnumSet;
 import java.util.List;
 
 public class SearchForItemsGoal extends Goal {
+
     private final Hamster mob;
     private final double speedModifier;
     private final double horizontalSearchRange;
@@ -29,10 +27,7 @@ public class SearchForItemsGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (mob.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty() && !mob.isInSittingPose()) {
-            List<ItemEntity> list = mob.level().getEntitiesOfClass(ItemEntity.class, mob.getBoundingBox().inflate(horizontalSearchRange, verticalSearchRange, horizontalSearchRange), itemEntity -> ingredient.test(itemEntity.getItem()));
-            return !list.isEmpty() && mob.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty();
-        }
+        if (this.mob.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty() && !this.mob.isInSittingPose()) return !this.getNearbyItems().isEmpty() && this.mob.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty();
         return false;
     }
 
@@ -43,20 +38,15 @@ public class SearchForItemsGoal extends Goal {
 
     @Override
     public void tick() {
-        List<ItemEntity> list = mob.level().getEntitiesOfClass(ItemEntity.class, mob.getBoundingBox().inflate(horizontalSearchRange, verticalSearchRange, horizontalSearchRange), itemEntity -> ingredient.test(itemEntity.getItem()));
-        ItemStack itemstack = mob.getItemBySlot(EquipmentSlot.MAINHAND);
-        if (itemstack.isEmpty() && !list.isEmpty()) {
-            mob.getNavigation().moveTo(list.get(0), speedModifier);
-        }
-
+        if (this.mob.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty() && !this.getNearbyItems().isEmpty()) this.mob.getNavigation().moveTo(this.getNearbyItems().get(0), this.speedModifier);
     }
 
     @Override
     public void start() {
-        List<ItemEntity> list = mob.level().getEntitiesOfClass(ItemEntity.class, mob.getBoundingBox().inflate(horizontalSearchRange, verticalSearchRange, horizontalSearchRange), itemEntity -> ingredient.test(itemEntity.getItem()));
-        if (!list.isEmpty()) {
-            mob.getNavigation().moveTo(list.get(0), speedModifier);
-        }
+        if (!this.getNearbyItems().isEmpty()) this.mob.getNavigation().moveTo(this.getNearbyItems().get(0), this.speedModifier);
+    }
 
+    private List<ItemEntity> getNearbyItems() {
+        return this.mob.level().getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(this.horizontalSearchRange, this.verticalSearchRange, this.horizontalSearchRange), itemEntity -> this.ingredient.test(itemEntity.getItem()));
     }
 }

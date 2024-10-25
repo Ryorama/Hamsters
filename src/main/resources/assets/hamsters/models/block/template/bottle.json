@@ -1,8 +1,8 @@
 {
-	"credit": "Made with Blockbench",
 	"texture_size": [32, 32],
 	"textures": {
-		"all": "hamsters:block/bottle/blue"
+		"all": "hamsters:block/bottle/blue",
+		"particle": "#all"
 	},
 	"elements": [
 		{

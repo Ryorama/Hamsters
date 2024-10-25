@@ -5,12 +5,8 @@ import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ItemLike;
-
-import static com.starfish_studios.hamsters.registry.HamstersBlocks.CAGE_PANEL;
+import static com.starfish_studios.hamsters.registry.HamstersBlocks.*;
 import static com.starfish_studios.hamsters.registry.HamstersBlocks.HAMSTER_WHEEL;
 import static com.starfish_studios.hamsters.registry.HamstersItems.*;
 
@@ -19,10 +15,11 @@ public class HamstersCreativeModeTab {
     @SuppressWarnings("unused")
     public static final CreativeModeTab ITEM_GROUP = register("item_group", FabricItemGroup.builder().icon(HAMSTER_SPAWN_EGG::getDefaultInstance).title(Component.translatable("itemGroup.hamsters.tab")).displayItems((featureFlagSet, output) -> {
 
-//        output.accept(TUNNEL);
+        // output.accept(TUNNEL);
         output.accept(HAMSTER_WHEEL);
 
-//        // RED, ORANGE, YELLOW, LIME, GREEN, CYAN, BLUE, LIGHT BLUE, PINK, MAGENTA, PURPLE, WHITE, LIGHT GRAY, GRAY, BLACK, BROWN
+        // RED, ORANGE, YELLOW, LIME, GREEN, CYAN, BLUE, LIGHT BLUE, PINK, MAGENTA, PURPLE, WHITE, LIGHT GRAY, GRAY, BLACK, BROWN
+
         output.accept(CAGE_PANEL);
         output.accept(RED_CAGE_PANEL);
         output.accept(ORANGE_CAGE_PANEL);
@@ -92,13 +89,14 @@ public class HamstersCreativeModeTab {
         output.accept(BLACK_HAMSTER_BALL);
         output.accept(BROWN_HAMSTER_BALL);
 
-
         output.accept(HAMSTER_SPAWN_EGG);
         output.accept(HAMSTER_NEW_SPAWN_EGG);
+
         }).build()
     );
 
+    @SuppressWarnings("all")
     private static CreativeModeTab register(String id, CreativeModeTab tab) {
-        return Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, new ResourceLocation(Hamsters.MOD_ID, id), tab);
+        return Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, Hamsters.id(id), tab);
     }
 }

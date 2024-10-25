@@ -1,8 +1,7 @@
 {
-	"credit": "Made with Blockbench",
 	"textures": {
-		"particle": "hamsters:block/cage_panel/blue",
-		"all": "hamsters:block/cage_panel/blue"
+		"all": "hamsters:block/cage_panel/blue",
+		"particle": "hamsters:block/cage_panel/blue"
 	},
 	"elements": [
 		{

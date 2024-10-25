@@ -7,24 +7,30 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.block.SoundType;
 
-public interface HamstersSoundEvents {
+@SuppressWarnings("unused")
+public class HamstersSoundEvents {
 
+    public static final SoundEvent HAMSTER_AMBIENT = registerSoundEvent("entity.hamster.ambient");
+    public static final SoundEvent HAMSTER_HURT = registerSoundEvent("entity.hamster.hurt");
+    public static final SoundEvent HAMSTER_DEATH = registerSoundEvent("entity.hamster.death");
+    public static final SoundEvent HAMSTER_BEG = registerSoundEvent("entity.hamster.beg");
+    public static final SoundEvent HAMSTER_SLEEP = registerSoundEvent("entity.hamster.sleep");
+    public static final SoundEvent HAMSTER_EXPLODE = registerSoundEvent("entity.hamster.explode");
 
+    private static SoundType registerBlockSoundType(String name, float volume, float pitch) {
 
-    SoundEvent HAMSTER_AMBIENT = register("entity.hamster.ambient");
-    SoundEvent HAMSTER_HURT = register("entity.hamster.hurt");
-    SoundEvent HAMSTER_DEATH = register("entity.hamster.death");
-    SoundEvent HAMSTER_BEG = register("entity.hamster.beg");
-    SoundEvent HAMSTER_SLEEP = register("entity.hamster.sleep");
+        String blockString = "block.";
 
-    SoundEvent HAMSTER_ExPLODE = register("entity.hamster.explode");
-
-    private static SoundType register(String name, float volume, float pitch) {
-        return new SoundType(volume, pitch, register("block." + name + ".break"), register("block." + name + ".step"), register("block." + name + ".place"), register("block." + name + ".hit"), register("block." + name + ".fall"));
+        return new SoundType(volume, pitch,
+        registerSoundEvent(blockString + name + ".break"),
+        registerSoundEvent(blockString + name + ".step"),
+        registerSoundEvent(blockString + name + ".place"),
+        registerSoundEvent(blockString + name + ".hit"),
+        registerSoundEvent(blockString + name + ".fall"));
     }
 
-    static SoundEvent register(String name) {
-        ResourceLocation id = new ResourceLocation(Hamsters.MOD_ID, name);
-        return Registry.register(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id));
+    private static SoundEvent registerSoundEvent(String id) {
+        ResourceLocation resourceLocation = Hamsters.id(id);
+        return Registry.register(BuiltInRegistries.SOUND_EVENT, resourceLocation, SoundEvent.createVariableRangeEvent(resourceLocation));
     }
 }

@@ -8,7 +8,4 @@ public interface HamstersGeoEntity extends GeoEntity {
     default double getBoneResetTime() {
         return 5;
     }
-
-
-
 }

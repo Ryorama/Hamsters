@@ -1,6 +1,7 @@
 package com.starfish_studios.hamsters.block.properties;
 
 import net.minecraft.util.StringRepresentable;
+import org.jetbrains.annotations.NotNull;
 
 public enum CageType implements StringRepresentable {
     TOP("top"),
@@ -10,7 +11,7 @@ public enum CageType implements StringRepresentable {
 
     private final String name;
 
-    private CageType(String type) {
+    CageType(String type) {
         this.name = type;
     }
 
@@ -18,7 +19,7 @@ public enum CageType implements StringRepresentable {
         return this.name;
     }
 
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
         return this.name;
     }
 }

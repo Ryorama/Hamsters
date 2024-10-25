@@ -3,9 +3,7 @@ package com.starfish_studios.hamsters.entity;
 import com.starfish_studios.hamsters.entity.common.HamstersGeoEntity;
 import com.starfish_studios.hamsters.registry.HamstersEntityType;
 import com.starfish_studios.hamsters.registry.HamstersItems;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -28,108 +26,84 @@ import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
-
 import java.util.Objects;
 
 public class HamsterBall extends PathfinderMob implements HamstersGeoEntity {
+
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(0, ItemStack.EMPTY);
 
     protected static final RawAnimation ROLL = RawAnimation.begin().thenLoop("animation.sf_nba.hamster_ball.roll");
-
 
     public HamsterBall(EntityType<? extends PathfinderMob> entityType, Level level) {
         super(entityType, level);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, 500.0)
-                .add(Attributes.MOVEMENT_SPEED, 0.25);
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 500.0).add(Attributes.MOVEMENT_SPEED, 0.25);
     }
 
-
-    protected SoundEvent getHurtSound(DamageSource damageSource) {
+    protected SoundEvent getHurtSound(@NotNull DamageSource damageSource) {
         return SoundEvents.SHULKER_HURT_CLOSED;
     }
 
-    protected void positionRider(Entity entity, Entity.MoveFunction moveFunction) {
+    protected void positionRider(@NotNull Entity entity, Entity.@NotNull MoveFunction moveFunction) {
         super.positionRider(entity, moveFunction);
-
-        Hamster hamster = (Hamster) entity;
-        if (entity.is(hamster)) {
-            entity.setPos(this.getX(), this.getY() + 0.125f, this.getZ());
-        }
-
+        if (entity instanceof Hamster) entity.setPos(this.getX(), this.getY() + 0.125f, this.getZ());
     }
 
     @Nullable
     public LivingEntity getControllingPassenger() {
-        Entity var2 = this.getFirstPassenger();
-        if (var2 instanceof Hamster hamster) {
-            return hamster;
-        }
+        if (this.getFirstPassenger() instanceof Hamster hamster) return hamster;
         return null;
     }
 
     @Override
-    public final @NotNull InteractionResult mobInteract(Player player, InteractionHand hand) {
-        if (player.isShiftKeyDown()) {
-            if (!this.level().isClientSide) {
-                this.remove(RemovalReason.DISCARDED);
-                this.spawnAtLocation(Objects.requireNonNull(this.getPickResult()));
-                level().playSound(null, blockPosition(), SoundEvents.CHICKEN_EGG, SoundSource.NEUTRAL, 0.6F, ((level().random.nextFloat() - level().random.nextFloat()) * 0.2F + 1.0F));
-            }
+    public final @NotNull InteractionResult mobInteract(@NotNull Player player, @NotNull InteractionHand interactionHand) {
+
+        if (!this.level().isClientSide() && player.isShiftKeyDown()) {
+            this.remove(RemovalReason.DISCARDED);
+            this.spawnAtLocation(Objects.requireNonNull(this.getPickResult()));
+            level().playSound(null, this.blockPosition(), SoundEvents.CHICKEN_EGG, SoundSource.NEUTRAL, 0.6F, ((this.level().getRandom().nextFloat() - this.level().getRandom().nextFloat()) * 0.2F + 1.0F));
             return InteractionResult.SUCCESS;
         }
-        return InteractionResult.PASS;
+
+        return super.mobInteract(player, interactionHand);
     }
 
-    public void travel(Vec3 vec3) {
-        float f;
-        float p = 0.91F;
-        f = this.onGround() ? p * 0.91F : 0.91F;
-        Vec3 vec37 = this.handleRelativeFrictionAndCalculateMovement(vec3, p);
-        double q = vec37.y;
-
-        this.setDeltaMovement(vec37.x * (double)f, q * 0.9800000190734863, vec37.z * (double)f);
+    @Override
+    public void travel(@NotNull Vec3 vec3) {
+        float baseMovement = 0.91F;
+        float horizontalMultiplier = this.onGround() ? baseMovement * 0.91F : 0.91F;
+        Vec3 calculateMovement = this.handleRelativeFrictionAndCalculateMovement(vec3, baseMovement);
+        this.setDeltaMovement(calculateMovement.x() * (double) (horizontalMultiplier), calculateMovement.y() * 0.9800000190734863, calculateMovement.z() * (double) horizontalMultiplier);
     }
 
+    @Override
+    protected void tickRidden(@NotNull Player player, @NotNull Vec3 vec3) {
 
-    protected void tickRidden(Player player, Vec3 vec3) {
-        LivingEntity livingEntity = this.getControllingPassenger();
-        assert livingEntity != null;
-        if (livingEntity.getType() == HamstersEntityType.HAMSTER && livingEntity != player) {
-            this.setRot(livingEntity.getYRot(), livingEntity.getXRot() * 0.5F);
+        LivingEntity controllingPassenger = this.getControllingPassenger();
+        assert controllingPassenger != null;
+
+        if (controllingPassenger.getType() == HamstersEntityType.HAMSTER && controllingPassenger != player) {
+            this.setRot(controllingPassenger.getYRot(), controllingPassenger.getXRot() * 0.5F);
             this.yRotO = this.yBodyRot = this.yHeadRot = this.getYRot();
         }
+
         super.tickRidden(player, vec3);
     }
 
-    protected @NotNull Vec3 getRiddenInput(Player player, Vec3 vec3) {
+    @Override
+    protected @NotNull Vec3 getRiddenInput(@NotNull Player player, @NotNull Vec3 vec3) {
         return new Vec3(0.0, 0.0, 1.0);
     }
 
-    protected float getRiddenSpeed(Player player) {
-        return (float)(this.getAttributeValue(Attributes.MOVEMENT_SPEED) * 1.25);
-    }
-
-    // region MISC
-
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
+    protected float getRiddenSpeed(@NotNull Player player) {
+        return (float) (this.getAttributeValue(Attributes.MOVEMENT_SPEED) * 1.25);
     }
 
-    @Override
-    public void readAdditionalSaveData(CompoundTag compoundTag) {
-        super.readAdditionalSaveData(compoundTag);
-    }
-
-    @Override
-    public void addAdditionalSaveData(CompoundTag compoundTag) {
-        super.addAdditionalSaveData(compoundTag);
-    }
+    // region Misc
 
     @Override
     public @NotNull Iterable<ItemStack> getArmorSlots() {
@@ -137,12 +111,12 @@ public class HamsterBall extends PathfinderMob implements HamstersGeoEntity {
     }
 
     @Override
-    public @NotNull ItemStack getItemBySlot(EquipmentSlot equipmentSlot) {
+    public @NotNull ItemStack getItemBySlot(@NotNull EquipmentSlot equipmentSlot) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
+    public void setItemSlot(@NotNull EquipmentSlot equipmentSlot, @NotNull ItemStack itemStack) {
         this.verifyEquippedItem(itemStack);
     }
 
@@ -151,29 +125,27 @@ public class HamsterBall extends PathfinderMob implements HamstersGeoEntity {
         return HumanoidArm.RIGHT;
     }
 
-    // endregion
-
     @Override
     public ItemStack getPickResult() {
         return new ItemStack(HamstersItems.BLUE_HAMSTER_BALL);
     }
 
+    // endregion
 
-
-    // region GECKOLIB
+    // region GeckoLib
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
         controllerRegistrar.add(new AnimationController<>(this, "controller", 0, this::animController));
     }
 
-
-
     protected <E extends HamsterBall> PlayState animController(final AnimationState<E> event) {
+
         if (event.isMoving() && this.getDeltaMovement().x() != 0 || this.getDeltaMovement().z() != 0) {
             event.setAnimation(ROLL);
             return PlayState.CONTINUE;
         }
+
         return PlayState.STOP;
     }
 

@@ -9,7 +9,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -27,122 +26,122 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CagePanelBlock extends Block {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final EnumProperty<CageType> TYPE = EnumProperty.create("type", CageType.class);
 
-    public static final VoxelShape NORTH_AABB = Block.box(0, 0, 15, 16, 16, 16);
-    public static final VoxelShape EAST_AABB = Block.box(0, 0, 0, 1, 16, 16);
-    public static final VoxelShape SOUTH_AABB = Block.box(0, 0, 0, 16, 16, 1);
-    public static final VoxelShape WEST_AABB = Block.box(15, 0, 0, 16, 16, 16);
+    private static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    private static final EnumProperty<CageType> TYPE = EnumProperty.create("type", CageType.class);
 
-    public static final VoxelShape NORTH_COLLISION_AABB = Block.box(0, 0, 15, 16, 24, 16);
-    public static final VoxelShape EAST_COLLISION_AABB = Block.box(0, 0, 0, 1, 24, 16);
-    public static final VoxelShape SOUTH_COLLISION_AABB = Block.box(0, 0, 0, 16, 24, 1);
-    public static final VoxelShape WEST_COLLISION_AABB = Block.box(15, 0, 0, 16, 24, 16);
+    private static final VoxelShape NORTH_AABB = Block.box(0, 0, 15, 16, 16, 16);
+    private static final VoxelShape SOUTH_AABB = Block.box(0, 0, 0, 16, 16, 1);
+    private static final VoxelShape EAST_AABB = Block.box(0, 0, 0, 1, 16, 16);
+    private static final VoxelShape WEST_AABB = Block.box(15, 0, 0, 16, 16, 16);
+
+    private static final VoxelShape NORTH_COLLISION_AABB = Block.box(0, 0, 15, 16, 24, 16);
+    private static final VoxelShape SOUTH_COLLISION_AABB = Block.box(0, 0, 0, 16, 24, 1);
+    private static final VoxelShape EAST_COLLISION_AABB = Block.box(0, 0, 0, 1, 24, 16);
+    private static final VoxelShape WEST_COLLISION_AABB = Block.box(15, 0, 0, 16, 24, 16);
 
     public CagePanelBlock(Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any()
-                .setValue(TYPE, CageType.NONE));
+        this.registerDefaultState(this.getStateDefinition().any().setValue(TYPE, CageType.NONE).setValue(FACING, Direction.NORTH));
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public @NotNull VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
-        Direction direction = state.getValue(FACING);
-        return switch (direction) {
-            case EAST -> EAST_AABB;
+    public @NotNull VoxelShape getShape(BlockState blockState, @NotNull BlockGetter blockGetter, @NotNull BlockPos blockPos, @NotNull CollisionContext collisionContext) {
+        return switch (blockState.getValue(FACING)) {
             case SOUTH -> SOUTH_AABB;
+            case EAST -> EAST_AABB;
             case WEST -> WEST_AABB;
             default -> NORTH_AABB;
         };
     }
 
-    //getCollisionShape
+    @SuppressWarnings("deprecation")
     @Override
-    public @NotNull VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
-        Direction direction = state.getValue(FACING);
-        return switch (direction) {
-            case EAST -> EAST_COLLISION_AABB;
+    public @NotNull VoxelShape getCollisionShape(BlockState blockState, @NotNull BlockGetter blockGetter, @NotNull BlockPos blockPos, @NotNull CollisionContext collisionContext) {
+        return switch (blockState.getValue(FACING)) {
             case SOUTH -> SOUTH_COLLISION_AABB;
+            case EAST -> EAST_COLLISION_AABB;
             case WEST -> WEST_COLLISION_AABB;
             default -> NORTH_COLLISION_AABB;
         };
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public @NotNull InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (player.getItemInHand(hand).is(HamstersTags.CAGE_PANELS)) {
-            BlockPos above = pos.above();
-            if (level.isEmptyBlock(above)) {
-                BlockItem blockItem = (BlockItem) player.getItemInHand(hand).getItem();
-//                level.setBlock(above, state, 3);
-                level.setBlock(above, blockItem.getBlock().defaultBlockState().setValue(FACING, state.getValue(FACING)), 3);
-                level.playSound(null, pos, this.getSoundType(state).getPlaceSound(), SoundSource.BLOCKS, level.random.nextFloat() * 0.25F + 0.7F, level.random.nextFloat() * 0.1F + 0.9F);
-                return InteractionResult.SUCCESS;
-            }
+    public @NotNull InteractionResult use(@NotNull BlockState blockState, @NotNull Level level, BlockPos blockPos, Player player, @NotNull InteractionHand interactionHand, @NotNull BlockHitResult blockHitResult) {
+
+        BlockPos abovePos = blockPos.above();
+
+        if (player.getItemInHand(interactionHand).is(HamstersTags.CAGE_PANELS) && level.isEmptyBlock(abovePos)) {
+            BlockItem blockItem = (BlockItem) player.getItemInHand(interactionHand).getItem();
+            level.setBlock(abovePos, blockItem.getBlock().defaultBlockState().setValue(FACING, blockState.getValue(FACING)), 3);
+            level.playSound(null, blockPos, this.getSoundType(blockState).getPlaceSound(), SoundSource.BLOCKS, level.getRandom().nextFloat() * 0.25F + 0.7F, level.getRandom().nextFloat() * 0.1F + 0.9F);
+            return InteractionResult.SUCCESS;
         }
-        return InteractionResult.PASS;
+
+        return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
     }
 
-
-    public float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+    @SuppressWarnings("deprecation")
+    @Override
+    public float getShadeBrightness(@NotNull BlockState blockState, @NotNull BlockGetter blockGetter, @NotNull BlockPos blockPos) {
         return 1.0F;
     }
 
-    public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+    @Override
+    public boolean propagatesSkylightDown(@NotNull BlockState blockState, @NotNull BlockGetter blockGetter, @NotNull BlockPos blockPos) {
         return true;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter reader, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(@NotNull BlockState blockState, @NotNull BlockGetter blockGetter, @NotNull BlockPos blockPos, @NotNull PathComputationType pathComputationType) {
         return false;
     }
 
-    @Nullable
-    @Override
+    @Nullable @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
+
         Level level = context.getLevel();
-        BlockPos pos = context.getClickedPos();
+        BlockPos blockPos = context.getClickedPos();
         Direction direction = context.getHorizontalDirection().getOpposite();
 
-        BlockState state = this.defaultBlockState().setValue(FACING, direction);
-        state = state.setValue(TYPE, getType(state, getRelativeTop(level, pos, direction), getRelativeBottom(level, pos, direction)));
-        return state;
+        BlockState blockState = this.defaultBlockState().setValue(FACING, direction);
+        blockState = blockState.setValue(TYPE, this.getType(blockState, this.getRelativeTop(level, blockPos), this.getRelativeBottom(level, blockPos)));
+        return blockState;
     }
 
-
-    public boolean skipRendering(BlockState blockState, BlockState blockState2, Direction direction) {
-//        return blockState2.is(this) && blockState2.getValue(FACING) == blockState.getValue(FACING);
-        return blockState2.getBlock() instanceof CagePanelBlock && blockState2.getValue(FACING) == blockState.getValue(FACING);
-    }
-
+    @SuppressWarnings("deprecation")
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
-        if (level.isClientSide) return;
-
-        Direction direction = state.getValue(FACING);
-        CageType type = getType(state, getRelativeTop(level, pos, direction), getRelativeBottom(level, pos, direction));
-        if (state.getValue(TYPE) == type) return;
-
-        state = state.setValue(TYPE, type);
-        level.setBlock(pos, state, 3);
+    public boolean skipRendering(@NotNull BlockState blockState, BlockState neighborState, @NotNull Direction direction) {
+        return neighborState.getBlock() instanceof CagePanelBlock && neighborState.getValue(FACING) == blockState.getValue(FACING);
     }
 
-    public BlockState getRelativeTop(Level level, BlockPos pos, Direction direction) {
-        return level.getBlockState(pos.above());
+    @SuppressWarnings("deprecation")
+    @Override
+    public void neighborChanged(@NotNull BlockState blockState, Level level, @NotNull BlockPos blockPos, @NotNull Block block, @NotNull BlockPos fromPos, boolean isMoving) {
+
+        if (level.isClientSide()) return;
+
+        CageType cageType = this.getType(blockState, this.getRelativeTop(level, blockPos), this.getRelativeBottom(level, blockPos));
+        if (blockState.getValue(TYPE) == cageType) return;
+        blockState = blockState.setValue(TYPE, cageType);
+        level.setBlockAndUpdate(blockPos, blockState);
     }
 
-    public BlockState getRelativeBottom(Level level, BlockPos pos, Direction direction) {
-        return level.getBlockState(pos.below());
+    private BlockState getRelativeTop(Level level, BlockPos blockPos) {
+        return level.getBlockState(blockPos.above());
     }
 
-    public CageType getType(BlockState state, BlockState above, BlockState below) {
-//        boolean shape_above_same = above.is(state.getBlock()) && state.getValue(FACING) == above.getValue(FACING);
-//        boolean shape_below_same = below.is(state.getBlock()) && state.getValue(FACING) == below.getValue(FACING);
+    private BlockState getRelativeBottom(Level level, BlockPos blockPos) {
+        return level.getBlockState(blockPos.below());
+    }
 
-        // Return the booleans the same as above but instead of state.getBlock, do it if they're an instanceof CagePanelBlock
-        boolean shape_above_same = above.getBlock() instanceof CagePanelBlock && state.getValue(FACING) == above.getValue(FACING);
-        boolean shape_below_same = below.getBlock() instanceof CagePanelBlock && state.getValue(FACING) == below.getValue(FACING);
+    private CageType getType(BlockState blockState, BlockState aboveState, BlockState belowState) {
+
+        boolean shape_above_same = aboveState.getBlock() instanceof CagePanelBlock && blockState.getValue(FACING) == aboveState.getValue(FACING);
+        boolean shape_below_same = belowState.getBlock() instanceof CagePanelBlock && blockState.getValue(FACING) == belowState.getValue(FACING);
 
         if (shape_above_same && !shape_below_same) return CageType.BOTTOM;
         else if (!shape_above_same && shape_below_same) return CageType.TOP;

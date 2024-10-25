@@ -9,20 +9,21 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
-@Environment(value= EnvType.CLIENT)
+@Environment(EnvType.CLIENT)
 public class SeatRenderer extends EntityRenderer<SeatEntity> {
-    public SeatRenderer(EntityRendererProvider.Context context)
-    {
+
+    public SeatRenderer(EntityRendererProvider.Context context) {
         super(context);
     }
 
+    @SuppressWarnings("all")
     @Override
-    public ResourceLocation getTextureLocation(SeatEntity seatEntity)
-    {
+    public ResourceLocation getTextureLocation(@NotNull SeatEntity seatEntity) {
         return null;
     }
 
     @Override
-    protected void renderNameTag(SeatEntity entity, Component component, PoseStack stack, MultiBufferSource source, int light) {}
+    protected void renderNameTag(@NotNull SeatEntity seatEntity, @NotNull Component component, @NotNull PoseStack poseStack, @NotNull MultiBufferSource multiBufferSource, int light) {}
 }
