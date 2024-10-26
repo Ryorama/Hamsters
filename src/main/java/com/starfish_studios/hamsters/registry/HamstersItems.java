@@ -29,6 +29,7 @@ public class HamstersItems {
     // public static final Item TUNNEL = register("tunnel", new BlockItem(HamstersBlocks.TUNNEL, new FabricItemSettings()));
 
     public static final Item HAMSTER = register("hamster", new HamsterItem(new FabricItemSettings().stacksTo(1)));
+    public static final Item SEED_MIX = register("seed_mix", new Item(new FabricItemSettings()));
 
     // RED, ORANGE, YELLOW, LIME, GREEN, CYAN, BLUE, LIGHT BLUE, PINK, MAGENTA, PURPLE, WHITE, LIGHT GRAY, GRAY, BLACK, BROWN
 
@@ -56,6 +57,7 @@ public class HamstersItems {
 //    public static Supplier<Item> registerCaughtMobItem(String name, EntityType entitySupplier, Supplier<? extends Fluid> fluidSupplier, SoundEvent soundSupplier, int variantAmount) {
 //        return registerItem(name, () ->  new HamsterItem(entitySupplier, fluidSupplier.get(), soundSupplier, variantAmount, new Item.Properties().stacksTo(1)));
 //    }
+
 
     @SuppressWarnings("unused")
     public static <T extends Item> Supplier<T> registerItem(String id, Supplier<T> item) {

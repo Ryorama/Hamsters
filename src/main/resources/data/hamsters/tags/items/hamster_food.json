@@ -1,7 +1,5 @@
 {
   "values": [
-    "minecraft:wheat_seeds",
-    "minecraft:beetroot_seeds",
-    "minecraft:pumpkin_seeds"
+    "hamsters:seed_mix"
   ]
 }

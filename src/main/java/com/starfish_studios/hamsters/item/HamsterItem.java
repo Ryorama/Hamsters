@@ -38,6 +38,7 @@ public class HamsterItem extends Item {
         if (itemStack.hasTag() && itemStack.getTag() != null) hamster.load(itemStack.getTag());
 
         hamster.moveTo(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5, Objects.requireNonNull(useOnContext.getPlayer()).getYRot(), 0.0F);
+        hamster.setOwnerUUID(useOnContext.getPlayer().getUUID());
 
         hamster.playSound(SoundEvents.CHICKEN_EGG);
         useOnContext.getLevel().addFreshEntity(hamster);

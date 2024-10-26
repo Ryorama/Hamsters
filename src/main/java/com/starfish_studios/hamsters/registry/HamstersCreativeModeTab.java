@@ -16,6 +16,7 @@ public class HamstersCreativeModeTab {
     public static final CreativeModeTab ITEM_GROUP = register("item_group", FabricItemGroup.builder().icon(HAMSTER_SPAWN_EGG::getDefaultInstance).title(Component.translatable("itemGroup.hamsters.tab")).displayItems((featureFlagSet, output) -> {
 
         // output.accept(TUNNEL);
+        output.accept(SEED_MIX);
         output.accept(HAMSTER_WHEEL);
 
         // RED, ORANGE, YELLOW, LIME, GREEN, CYAN, BLUE, LIGHT BLUE, PINK, MAGENTA, PURPLE, WHITE, LIGHT GRAY, GRAY, BLACK, BROWN

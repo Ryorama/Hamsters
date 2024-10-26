@@ -49,7 +49,7 @@ public class HamstersEntityType {
     public static final Supplier<EntityType<SeatEntity>> SEAT = registerEntityType("seat", (type, world) -> new SeatEntity(world), MobCategory.MISC, 0.0F, 0.0F);
 
     static {
-        BiomeModifications.addSpawn(BiomeSelectors.tag(HamstersTags.HAS_HAMSTER), MobCategory.CREATURE, HamstersEntityType.HAMSTER_NEW, 30, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.tag(HamstersTags.HAS_HAMSTER), MobCategory.CREATURE, HamstersEntityType.HAMSTER_NEW, 10, 1, 2);
     }
 
     public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(String id, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height) {

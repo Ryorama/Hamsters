@@ -2,6 +2,8 @@ package com.starfish_studios.hamsters.entity;
 
 import com.google.common.collect.Lists;
 import com.starfish_studios.hamsters.entity.common.MMPathNavigatorGround;
+import com.starfish_studios.hamsters.entity.common.SleepGoal;
+import com.starfish_studios.hamsters.entity.common.SleepingAnimal;
 import com.starfish_studios.hamsters.entity.common.SmartBodyHelper;
 import com.starfish_studios.hamsters.registry.HamstersEntityType;
 import com.starfish_studios.hamsters.registry.HamstersSoundEvents;
@@ -34,7 +36,11 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.animal.Cat;
+import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.animal.ShoulderRidingEntity;
+import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
@@ -43,6 +49,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,7 +64,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.*;
 
-public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
+public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, SleepingAnimal {
 
     // region Variables
 
@@ -78,13 +85,23 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
     private static final EntityDataAccessor<Integer> CHEEK_LEVEL = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SQUISHED_TICKS = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> BIRTH_COUNTDOWN = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.BOOLEAN);
 
     private static final Ingredient FOOD_ITEMS = Ingredient.of(HamstersTags.HAMSTER_FOOD);
+
 
     // endregion
 
     public HamsterNew(EntityType<? extends ShoulderRidingEntity> entityType, Level level) {
         super(entityType, level);
+        this.setPathfindingMalus(BlockPathTypes.LAVA, 8.0F);
+        this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 1.0F);
+        this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 1.0F);
+        this.setPathfindingMalus(BlockPathTypes.DAMAGE_CAUTIOUS, 1.0F);
+        this.setPathfindingMalus((BlockPathTypes.DANGER_POWDER_SNOW), 1.0F);
+        this.setPathfindingMalus((BlockPathTypes.DANGER_OTHER), 1.0F);
+        this.setPathfindingMalus((BlockPathTypes.DAMAGE_OTHER), 1.0F);
+        this.setPathfindingMalus((BlockPathTypes.WATER_BORDER), 1.0F);
     }
 
     public static boolean checkHamsterNewSpawnRules(EntityType<? extends TamableAnimal> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource) {
@@ -122,26 +139,30 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.3));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(3, new BreedGoal(this, 1.0));
+        this.goalSelector.addGoal(4, new HamsterSleepGoal(this));
 
-        this.goalSelector.addGoal(4, new HamsterTemptGoal(this, 1.0, FOOD_ITEMS, true));
-        this.goalSelector.addGoal(4, new HamsterAvoidPlayersGoal(this, 6.0f, 1.6D, 1.6D));
+        this.goalSelector.addGoal(5, new HamsterTemptGoal(this, 1.0, FOOD_ITEMS, true));
+        this.goalSelector.addGoal(5, new HamsterAvoidPlayersGoal(this, 6.0f, 1.6D, 1.6D));
 //        this.goalSelector.addGoal(5, new AvoidEntityGoal<>(this, Animal.class, 10.0F, 1.5D, 2.0D, livingEntity -> livingEntity.getType().is(HamstersTags.HAMSTER_PREDATORS)));
-        this.goalSelector.addGoal(5, new AvoidEntityGoal<>(this, Player.class, 10.0F, 1.5D, 2.0D) {
+        this.goalSelector.addGoal(6, new AvoidEntityGoal<>(this, Fox.class, 10.0F, 1.5D, 2.0D));
+        this.goalSelector.addGoal(6, new AvoidEntityGoal<>(this, Cat.class, 10.0F, 1.5D, 2.0D));
+        this.goalSelector.addGoal(6, new AvoidEntityGoal<>(this, Wolf.class, 10.0F, 1.5D, 2.0D));
+        this.goalSelector.addGoal(6, new AvoidEntityGoal<>(this, Player.class, 5.0F, 1.5D, 2.0D) {
             @Override
             public boolean canUse() {
                 return !HamsterNew.this.isTame() && super.canUse();
             }
         });
-        this.goalSelector.addGoal(6, new FollowParentGoal(this, 1.0));
-        this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
-        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 6.0F) {
+        this.goalSelector.addGoal(7, new FollowParentGoal(this, 1.0));
+        this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1.0));
+        this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 6.0F) {
             @Override
             public void tick() {
                 if (this.mob instanceof HamsterNew hamsterNew && hamsterNew.getSquishedTicks() > 0) return;
                 super.tick();
             }
         });
-        this.goalSelector.addGoal(9, new HamsterLookAroundGoal(this));
+        this.goalSelector.addGoal(10, new HamsterLookAroundGoal(this));
 //        this.goalSelector.addGoal(10, new GetOnOwnersShoulderGoal(this));
     }
 
@@ -439,6 +460,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
         this.getEntityData().define(CHEEK_LEVEL, 0);
         this.getEntityData().define(SQUISHED_TICKS, 0);
         this.getEntityData().define(BIRTH_COUNTDOWN, 0);
+        this.getEntityData().define(SLEEPING, false);
     }
 
     @Override
@@ -450,6 +472,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
         this.setCheekLevel(compoundTag.getInt("CheekLevel"));
         this.setSquishedTicks(compoundTag.getInt("SquishedTicks"));
         this.setBirthCountdown(compoundTag.getInt("BirthCountdown"));
+        this.setSleeping(compoundTag.getBoolean("Sleeping"));
     }
 
     @Override
@@ -461,6 +484,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
         compoundTag.putInt("CheekLevel", this.getCheekLevel());
         compoundTag.putInt("SquishedTicks", this.getSquishedTicks());
         compoundTag.putInt("BirthCountdown", this.getBirthCountdown());
+        compoundTag.putBoolean("Sleeping", this.isSleeping());
     }
 
     public int getSquishedTicks() {
@@ -519,6 +543,37 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
 
     public void setCheekLevel(int cheekLevel) {
         this.entityData.set(CHEEK_LEVEL, cheekLevel);
+    }
+
+
+    @Override
+    public boolean isSleeping() {
+        return this.entityData.get(SLEEPING);
+    }
+
+    @Override
+    public boolean canSleep() {
+        long dayTime = this.level().getDayTime();
+        List<Player> players = this.level().getNearbyPlayers(TargetingConditions.forNonCombat().range(4.0D), this, this.getBoundingBox().inflate(4.0D, 2.0D, 4.0D));
+
+        if (dayTime > 12000 && dayTime < 23000) {
+            return false;
+        }
+
+        if (!players.isEmpty() && !players.get(0).isCreative() && !players.get(0).isCrouching()) {
+            return false;
+        }
+
+        else return !this.isInWater() // If the Hamster is not swimming
+            && !this.isInLava() // If the Hamster is not in Lava
+            && this.getSquishedTicks() <= 0 // If the Hamster is not squished
+            && !level().isThundering(); // If there's not a thunderstorm
+
+    }
+
+    @Override
+    public void setSleeping(boolean sleeping) {
+        this.entityData.set(SLEEPING, sleeping);
     }
 
     public enum Marking {
@@ -620,7 +675,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
                     event.setControllerSpeed(1.1F);
                     event.setAnimation(PINKIE_WALK);
                 } else {
-                    event.setControllerSpeed(1.1F);
+                    event.setControllerSpeed(1.1F * event.getLimbSwingAmount());
                     event.setAnimation(WALK);
                 }
             }
@@ -719,6 +774,12 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
 
         public void tick() {
             if (!this.isSittingOnShoulder && !this.entity.isInSittingPose() && !this.entity.isLeashed() && this.entity.getBoundingBox().intersects(this.owner.getBoundingBox())) this.isSittingOnShoulder = this.entity.setEntityOnShoulder(this.owner);
+        }
+    }
+
+    public static class HamsterSleepGoal extends SleepGoal<HamsterNew> {
+        public HamsterSleepGoal(HamsterNew mob) {
+            super(mob);
         }
     }
 
