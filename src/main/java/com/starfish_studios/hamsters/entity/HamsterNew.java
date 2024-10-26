@@ -8,6 +8,7 @@ import com.starfish_studios.hamsters.registry.HamstersSoundEvents;
 import com.starfish_studios.hamsters.registry.HamstersTags;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -19,11 +20,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.util.ByIdMap;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -31,11 +35,13 @@ import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.ShoulderRidingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -48,8 +54,8 @@ import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
+
 import java.util.*;
-import java.util.function.IntFunction;
 
 public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
 
@@ -71,6 +77,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
     private static final EntityDataAccessor<Integer> DATA_BOW_COLOR = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> CHEEK_LEVEL = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SQUISHED_TICKS = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> BIRTH_COUNTDOWN = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
 
     private static final Ingredient FOOD_ITEMS = Ingredient.of(HamstersTags.HAMSTER_FOOD);
 
@@ -78,6 +85,10 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
 
     public HamsterNew(EntityType<? extends ShoulderRidingEntity> entityType, Level level) {
         super(entityType, level);
+    }
+
+    public static boolean checkHamsterNewSpawnRules(EntityType<? extends TamableAnimal> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource) {
+        return levelAccessor.getBlockState(blockPos.below()).is(HamstersTags.HAMSTERS_SPAWNABLE_ON) && isBrightEnoughToSpawn(levelAccessor, blockPos);
     }
 
     @Override
@@ -91,14 +102,39 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
     }
 
     @Override
+    public SoundEvent getAmbientSound() {
+        return HamstersSoundEvents.HAMSTER_AMBIENT;
+    }
+
+    @Override
+    public SoundEvent getHurtSound(@NotNull DamageSource damageSource) {
+        return HamstersSoundEvents.HAMSTER_HURT;
+    }
+
+    @Override
+    public SoundEvent getDeathSound() {
+        return HamstersSoundEvents.HAMSTER_DEATH;
+    }
+
+    @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.3));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(3, new BreedGoal(this, 1.0));
-        this.goalSelector.addGoal(5, new TemptGoal(this, 1.0, FOOD_ITEMS, false));
-        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0));
-        this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0F) {
+
+        this.goalSelector.addGoal(4, new HamsterTemptGoal(this, 1.0, FOOD_ITEMS, true));
+        this.goalSelector.addGoal(4, new HamsterAvoidPlayersGoal(this, 6.0f, 1.6D, 1.6D));
+//        this.goalSelector.addGoal(5, new AvoidEntityGoal<>(this, Animal.class, 10.0F, 1.5D, 2.0D, livingEntity -> livingEntity.getType().is(HamstersTags.HAMSTER_PREDATORS)));
+        this.goalSelector.addGoal(5, new AvoidEntityGoal<>(this, Player.class, 10.0F, 1.5D, 2.0D) {
+            @Override
+            public boolean canUse() {
+                return !HamsterNew.this.isTame() && super.canUse();
+            }
+        });
+        this.goalSelector.addGoal(6, new FollowParentGoal(this, 1.0));
+        this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
+        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 6.0F) {
             @Override
             public void tick() {
                 if (this.mob instanceof HamsterNew hamsterNew && hamsterNew.getSquishedTicks() > 0) return;
@@ -106,11 +142,14 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
             }
         });
         this.goalSelector.addGoal(9, new HamsterLookAroundGoal(this));
-        // this.goalSelector.addGoal(10, new GetOnOwnersShoulderGoal(this));
+//        this.goalSelector.addGoal(10, new GetOnOwnersShoulderGoal(this));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return TamableAnimal.createMobAttributes().add(Attributes.MAX_HEALTH, 8.0D).add(Attributes.MOVEMENT_SPEED, 0.25D);
+        return TamableAnimal.createMobAttributes()
+                .add(Attributes.MAX_HEALTH, 8.0D)
+                .add(Attributes.MOVEMENT_SPEED, 0.25D)
+                .add(Attributes.ATTACK_DAMAGE, 1.0D);
     }
 
     @Override
@@ -137,9 +176,23 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
     }
 
     @Override
+    public void customServerAiStep() {
+        if (this.getMoveControl().hasWanted()) {
+            this.setSprinting(this.getMoveControl().getSpeedModifier() >= 1.3D);
+        } else {
+            this.setSprinting(false);
+        }
+        super.customServerAiStep();
+    }
+
+    @Override
     public void aiStep() {
 
         super.aiStep();
+
+        if (this.getBirthCountdown() > 0) {
+            this.setBirthCountdown(this.getBirthCountdown() - 1);
+        }
 
         if (this.getSquishedTicks() > 0) {
             this.setSquishedTicks(this.getSquishedTicks() - 1);
@@ -209,10 +262,11 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
             return canInteract ? InteractionResult.CONSUME : InteractionResult.PASS;
 
         } else {
-
-            if (this.isTame()) {
-
-                if (this.isFood(itemStack)) {
+             if (this.isTame()) {
+                 if (itemStack.is(Items.SWEET_BERRIES) && this.getAge() == 0 && this.canFallInLove()) {
+                     this.setInLove(player);
+                     return InteractionResult.SUCCESS;
+                 } else if (this.isFood(itemStack)) {
 
                     // Feeding
 
@@ -221,9 +275,14 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
                     if (!player.getAbilities().instabuild) itemStack.shrink(1);
 
                     if (this.getHealth() < this.getMaxHealth()) {
-
                         this.heal(this.getMaxHealth() / 4);
 
+                    }
+                    else if (this.getAge() < 0) {
+                        this.ageUp(1);
+                        if (!this.level().isClientSide) {
+                            ((ServerLevel) this.level()).sendParticles(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 5, 0.0D, 0.0D, 0.0D, 0.0D);
+                        }
                     } else {
 
                         if (this.getCheekLevel() < 3) {
@@ -234,7 +293,15 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
                         } else {
 
                             this.playSound(HamstersSoundEvents.HAMSTER_EXPLODE);
-                            this.remove(RemovalReason.KILLED);
+                            this.setHealth(0);
+
+                            this.level().addFreshEntity(new ExperienceOrb(this.level(), this.getX(), this.getY(), this.getZ(), 3));
+
+                            for (int i = 0; i < 4; i++) {
+                                ItemEntity seedsItem = new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), new ItemStack(Items.WHEAT_SEEDS));
+                                seedsItem.setDeltaMovement(this.getRandom().nextGaussian() * 0.1, this.getRandom().nextGaussian() * 0.2 + 0.2, this.getRandom().nextGaussian() * 0.1);
+                                this.level().addFreshEntity(seedsItem);
+                            }
 
                             ItemStack fireworkStack = this.getFirework(Util.getRandom(DyeColor.values(), this.getRandom()), this.getRandom().nextInt(3));
                             FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(this.level(), this, this.getX(), this.getEyeY(), this.getZ(), fireworkStack);
@@ -277,7 +344,9 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
                     }
                 }
 
-            } else if (this.isFood(itemStack)) {
+            }
+
+            else if (this.isFood(itemStack)) {
 
                 // Taming
 
@@ -305,9 +374,12 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
 
         this.populateDefaultEquipmentSlots(this.getRandom(), difficultyInstance);
 
-        if (spawnGroupData == null) {
+        if (mobSpawnType == MobSpawnType.SPAWN_EGG) {
             this.setVariant(Variant.BY_ID[this.getRandom().nextInt(Variant.BY_ID.length - 1)]);
-            this.setMarking(this.getRandom().nextInt(Marking.values().length));
+            this.setMarking(Marking.BY_ID[this.getRandom().nextInt(Marking.BY_ID.length)]);
+        } else if (mobSpawnType == MobSpawnType.CHUNK_GENERATION) {
+            this.setVariant(Variant.BY_ID[Variant.WILD.getId()]);
+            this.setMarking(Marking.BY_ID[Marking.BLANK.getId()]);
         }
 
         return spawnGroupData;
@@ -316,41 +388,31 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
     @Override
     public AgeableMob getBreedOffspring(@NotNull ServerLevel serverLevel, @NotNull AgeableMob ageableMob) {
 
+        this.setBirthCountdown(60);
+
         HamsterNew hamster = HamstersEntityType.HAMSTER_NEW.create(serverLevel);
         assert hamster != null;
 
-        // If both parents are Wild variant with no markings, the offspring will have a random color and marking.
 
-        if (ageableMob instanceof HamsterNew hamsterParent && hamsterParent.getVariant() == Variant.WILD.getId() && hamsterParent.getMarking() == Marking.BLANK.getId()) {
-            hamster.setVariant(Variant.BY_ID[this.getRandom().nextInt(Variant.BY_ID.length)]);
-            hamster.setMarking(Marking.byId(this.getRandom().nextInt(Marking.values().length)).getId());
+        if (this.isTame() && ageableMob instanceof HamsterNew hamsterParent && hamsterParent.isTame()) {
+            hamster.setTame(true);
+            hamster.setOwnerUUID(this.getOwnerUUID());
         }
 
-        // If one parent is Wild, and one parent has color/marking, the offspring will have a 50% chance of a random color/marking or will have the same as the parent with color/marking.
-
-        else if (ageableMob instanceof HamsterNew hamsterParent) {
-            if (hamsterParent.getVariant() == Variant.WILD.getId() && hamsterParent.getMarking() == Marking.BLANK.getId()) {
-                hamster.setVariant(Variant.BY_ID[this.getRandom().nextInt(Variant.BY_ID.length)]);
-                hamster.setMarking(Marking.byId(this.getRandom().nextInt(Marking.values().length)).getId());
-            } else {
-                hamster.setVariant(Variant.getTypeById(hamsterParent.getVariant()));
-                hamster.setMarking(hamsterParent.getMarking());
-            }
-        }
-
-        // If neither parent is Wild, and they have their own color and marking, the offspring will pick a color and marking from one of the parents.
-
-        else if (ageableMob instanceof HamsterNew hamsterParent) {
+        if (this.getVariant() == Variant.WILD.getId() && this.getMarking() == Marking.BLANK.getId() && ageableMob instanceof HamsterNew hamsterParent && hamsterParent.getVariant() == Variant.WILD.getId() && hamsterParent.getMarking() == Marking.BLANK.getId()) {
+            hamster.setVariant(Variant.BY_ID[this.getRandom().nextInt(Variant.BY_ID.length) - 1]);
+            hamster.setMarking(Marking.BY_ID[this.getRandom().nextInt(Marking.BY_ID.length)]);
+        } else if (this.getVariant() != Variant.WILD.getId() && ageableMob instanceof HamsterNew hamsterParent && hamsterParent.getVariant() != Variant.WILD.getId()) {
             hamster.setVariant(this.getOffspringVariant(this, hamsterParent));
-            hamster.setMarking(this.getOffspringPattern(this, hamsterParent).getId());
+            hamster.setMarking(this.getOffspringPattern(this, hamsterParent));
         }
 
         return hamster;
     }
 
     private Marking getOffspringPattern(HamsterNew hamster, HamsterNew otherParent) {
-        Marking marking = Marking.byId(hamster.getMarking());
-        Marking otherMarking = Marking.byId(otherParent.getMarking());
+        Marking marking = Marking.getTypeById(hamster.getMarking());
+        Marking otherMarking = Marking.getTypeById(otherParent.getMarking());
         return this.getRandom().nextBoolean() ? marking : otherMarking;
     }
 
@@ -376,16 +438,18 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
         this.getEntityData().define(DATA_BOW_COLOR, 0);
         this.getEntityData().define(CHEEK_LEVEL, 0);
         this.getEntityData().define(SQUISHED_TICKS, 0);
+        this.getEntityData().define(BIRTH_COUNTDOWN, 0);
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
         this.setVariant(Variant.BY_ID[compoundTag.getInt("Variant")]);
-        this.setMarking(compoundTag.getInt("Marking"));
+        this.setMarking(Marking.BY_ID[compoundTag.getInt("Marking")]);
         this.setBowColor(DyeColor.byId(compoundTag.getInt("BowColor")));
         this.setCheekLevel(compoundTag.getInt("CheekLevel"));
         this.setSquishedTicks(compoundTag.getInt("SquishedTicks"));
+        this.setBirthCountdown(compoundTag.getInt("BirthCountdown"));
     }
 
     @Override
@@ -396,6 +460,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
         compoundTag.putInt("BowColor", this.getBowColor().getId());
         compoundTag.putInt("CheekLevel", this.getCheekLevel());
         compoundTag.putInt("SquishedTicks", this.getSquishedTicks());
+        compoundTag.putInt("BirthCountdown", this.getBirthCountdown());
     }
 
     public int getSquishedTicks() {
@@ -404,6 +469,14 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
 
     public void setSquishedTicks(int squishedTicks) {
         this.getEntityData().set(SQUISHED_TICKS, squishedTicks);
+    }
+
+    public int getBirthCountdown() {
+        return this.getEntityData().get(BIRTH_COUNTDOWN);
+    }
+
+    public void setBirthCountdown(int birthCountdown) {
+        this.getEntityData().set(BIRTH_COUNTDOWN, birthCountdown);
     }
 
     public DyeColor getBowColor() {
@@ -428,8 +501,8 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
         return this.entityData.get(MARKING);
     }
 
-    public void setMarking(int marking) {
-        this.entityData.set(MARKING, marking);
+    public void setMarking(Marking marking) {
+        this.entityData.set(MARKING, marking.getId());
     }
 
     public int getVariant() {
@@ -455,8 +528,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
         ROAN (3, "roan"),
         BELLY (4, "belly");
 
-        private static final IntFunction<Marking> BY_ID = ByIdMap.continuous(Marking::getId, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
-
+        public static final Marking[] BY_ID = Arrays.stream(values()).sorted(Comparator.comparingInt(Marking::getId)).toArray(Marking[]::new);
         private final int id;
         private final String name;
 
@@ -470,8 +542,9 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
             return this.id;
         }
 
-        public static Marking byId(int id) {
-            return BY_ID.apply(id);
+        public static Marking getTypeById(int id) {
+            for (Marking type : values()) if (type.id == id) return type;
+            return Marking.BLANK;
         }
 
         public String getName() {
@@ -583,6 +656,38 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity {
         public void tick() {
             if (this.mob instanceof HamsterNew hamsterNew && hamsterNew.getSquishedTicks() > 0) return;
             super.tick();
+        }
+    }
+
+    static class HamsterAvoidPlayersGoal extends AvoidEntityGoal<Player> {
+        private final HamsterNew hamster;
+
+        public HamsterAvoidPlayersGoal(HamsterNew hamster, float maxDistance, double walkSpeed, double sprintSpeed) {
+            super(hamster, Player.class, maxDistance, walkSpeed, sprintSpeed, EntitySelector.NO_CREATIVE_OR_SPECTATOR::test);
+            this.hamster = hamster;
+        }
+
+        @Override
+        public boolean canUse() {
+            return !this.hamster.isTame() && super.canUse();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return !this.hamster.isTame() && super.canContinueToUse();
+        }
+    }
+
+    static class HamsterTemptGoal extends TemptGoal {
+        private final HamsterNew hamster;
+
+        public HamsterTemptGoal(HamsterNew hamster, double d, Ingredient ingredient, boolean bl) {
+            super(hamster, d, ingredient, bl);
+            this.hamster = hamster;
+        }
+
+        protected boolean canScare() {
+            return super.canScare() && !this.hamster.isTame();
         }
     }
 

@@ -33,14 +33,14 @@ public class HamsterNewMarkingLayer extends GeoRenderLayer<HamsterNew> {
 
     @Override
     public ResourceLocation getTextureResource(HamsterNew animatable) {
-        if (HamsterNew.Marking.byId(animatable.getMarking()) != HamsterNew.Marking.BLANK) return TEXTURES.get(HamsterNew.Marking.byId(animatable.getMarking()));
+        if (HamsterNew.Marking.BY_ID[animatable.getMarking()] != HamsterNew.Marking.BLANK) return TEXTURES.get(HamsterNew.Marking.BY_ID[animatable.getMarking()]);
         return Hamsters.id("textures/entity/hamster/blank.png");
     }
 
     @Override
     public void render(PoseStack poseStack, HamsterNew animatable, BakedGeoModel bakedModel, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
 
-        if (HamsterNew.Marking.byId(animatable.getMarking()) != HamsterNew.Marking.BLANK && !animatable.isBaby()) {
+        if (HamsterNew.Marking.BY_ID[animatable.getMarking()] != HamsterNew.Marking.BLANK) {
             RenderType entityTranslucent = RenderType.entityTranslucent(getTextureResource(animatable));
             this.getRenderer().actuallyRender(poseStack, animatable, bakedModel, renderType, bufferSource, bufferSource.getBuffer(entityTranslucent), true, partialTick, packedLight, packedOverlay, 1f, 1f, 1f, 1f);
         }

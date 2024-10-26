@@ -31,7 +31,7 @@ public class HamstersEntityType {
             .entityFactory(HamsterNew::new)
             .defaultAttributes(HamsterNew::createAttributes)
             .spawnGroup(MobCategory.CREATURE)
-            .spawnRestriction(SpawnPlacements.Type.ON_GROUND, Heightmap.Types.WORLD_SURFACE_WG, Animal::checkAnimalSpawnRules)
+            .spawnRestriction(SpawnPlacements.Type.ON_GROUND, Heightmap.Types.WORLD_SURFACE_WG, HamsterNew::checkHamsterNewSpawnRules)
             .dimensions(EntityDimensions.scalable(0.5F, 0.5F))
             .trackRangeChunks(10)
     );
@@ -49,7 +49,7 @@ public class HamstersEntityType {
     public static final Supplier<EntityType<SeatEntity>> SEAT = registerEntityType("seat", (type, world) -> new SeatEntity(world), MobCategory.MISC, 0.0F, 0.0F);
 
     static {
-        BiomeModifications.addSpawn(BiomeSelectors.tag(HamstersTags.HAS_HAMSTER), MobCategory.CREATURE, HamstersEntityType.HAMSTER, 30, 1, 1);
+        BiomeModifications.addSpawn(BiomeSelectors.tag(HamstersTags.HAS_HAMSTER), MobCategory.CREATURE, HamstersEntityType.HAMSTER_NEW, 30, 1, 1);
     }
 
     public static <T extends Entity> Supplier<EntityType<T>> registerEntityType(String id, EntityType.EntityFactory<T> factory, MobCategory category, float width, float height) {
