@@ -1,6 +1,6 @@
 package com.starfish_studios.hamsters.item;
 
-import com.starfish_studios.hamsters.entity.Hamster;
+import com.starfish_studios.hamsters.entity.HamsterNew;
 import com.starfish_studios.hamsters.registry.HamstersEntityType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -8,6 +8,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.decoration.PaintingVariants;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -31,7 +33,7 @@ public class HamsterItem extends Item {
         BlockPos blockPos = new BlockPlaceContext(useOnContext).getClickedPos();
         ItemStack itemStack = useOnContext.getItemInHand();
 
-        Hamster hamster = HamstersEntityType.HAMSTER.create(useOnContext.getLevel());
+        HamsterNew hamster = HamstersEntityType.HAMSTER_NEW.create(useOnContext.getLevel());
         assert hamster != null;
 
         if (itemStack.hasCustomHoverName()) hamster.setCustomName(itemStack.getHoverName());
@@ -53,7 +55,17 @@ public class HamsterItem extends Item {
         CompoundTag compoundTag = itemStack.getTag();
         if (compoundTag == null) return;
 
-        if (compoundTag.contains("Variant", 3)) list.add(Component.translatable("tooltip.hamsters." + Hamster.Variant.getTypeById(compoundTag.getInt("Variant")).getName()).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY));
+        if (compoundTag.contains("Marking", 3) && compoundTag.getInt("Marking") != 0) {
+            if (compoundTag.contains("Variant", 3) && compoundTag.getInt("Variant") == HamsterNew.Variant.getTypeById(0).getId()) {
+                list.add(Component.translatable("tooltip.hamsters.recessive").withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)
+                        .append(" ")
+                        .append(Component.translatable("tooltip.hamsters." + HamsterNew.Marking.getTypeById(compoundTag.getInt("Marking")).getName()).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY)));
+            } else {
+                list.add(Component.translatable("tooltip.hamsters." + HamsterNew.Marking.getTypeById(compoundTag.getInt("Marking")).getName()).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY));
+            }
+        }
+
+        if (compoundTag.contains("Variant", 3)) list.add(Component.translatable("tooltip.hamsters." + HamsterNew.Variant.getTypeById(compoundTag.getInt("Variant")).getName()).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY));
         if (compoundTag.getInt("Age") < 0) list.add(Component.translatable("tooltip.hamsters.baby").withStyle(ChatFormatting.ITALIC, ChatFormatting.BLUE));
         if (compoundTag.hasUUID("Owner")) list.add(Component.translatable("tooltip.hamsters.tamed").withStyle(ChatFormatting.ITALIC, ChatFormatting.BLUE));
     }

@@ -62,7 +62,7 @@ public class HamsterModel extends DefaultedEntityGeoModel<Hamster> {
         switch (marking) {
             case BLANK -> resourceLocation = Hamsters.id("textures/entity/hamster/blank.png");
             case BANDED -> resourceLocation = Hamsters.id("textures/entity/hamster/banded.png");
-            case DOMINANT_SPOTS -> resourceLocation = Hamsters.id("textures/entity/hamster/dominant_spots.png");
+            case SPOTS -> resourceLocation = Hamsters.id("textures/entity/hamster/dominant_spots.png");
             case ROAN -> resourceLocation = Hamsters.id("textures/entity/hamster/roan.png");
             case BELLY -> resourceLocation = Hamsters.id("textures/entity/hamster/belly.png");
         }

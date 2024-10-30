@@ -2,6 +2,7 @@ package com.starfish_studios.hamsters.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.starfish_studios.hamsters.client.model.HamsterNewModel;
+import com.starfish_studios.hamsters.client.renderer.layers.HamsterCollarLayer;
 import com.starfish_studios.hamsters.client.renderer.layers.HamsterNewMarkingLayer;
 import com.starfish_studios.hamsters.entity.HamsterNew;
 import net.fabricmc.api.EnvType;
@@ -50,6 +51,7 @@ public class HamsterNewRenderer extends GeoEntityRenderer<HamsterNew> {
         });
 
         this.addRenderLayer(new HamsterNewMarkingLayer(this));
+        this.addRenderLayer(new HamsterCollarLayer(this));
     }
 
     @Override

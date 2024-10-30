@@ -2,16 +2,22 @@ package com.starfish_studios.hamsters;
 
 import com.starfish_studios.hamsters.client.model.shoulder.LeftSittingHamsterModel;
 import com.starfish_studios.hamsters.client.renderer.*;
+import com.starfish_studios.hamsters.item.HamsterItem;
 import com.starfish_studios.hamsters.registry.HamstersBlocks;
 import com.starfish_studios.hamsters.registry.HamstersEntityType;
+import com.starfish_studios.hamsters.registry.HamstersItems;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import java.util.function.Supplier;
@@ -29,6 +35,29 @@ public class HamstersVanillaIntegration {
             registerModelLayers();
             registerBlockRenderLayers();
             registerRenderers();
+            registerItemModelPredicates();
+        }
+
+        private static void registerItemModelPredicates() {
+            for (int i = 0; i < 8; i++) {
+                ItemProperties.register(HamstersItems.HAMSTER, new ResourceLocation("variant"), (stack, world, entity, num) -> {
+                    CompoundTag compoundTag = stack.getTag();
+                    if (compoundTag != null && compoundTag.contains("Variant")) {
+                        return (float) compoundTag.getInt("Variant") / 7;
+                    }
+                    return 0;
+                });
+            }
+
+            for (int i = 0; i < 5; i++) {
+                ItemProperties.register(HamstersItems.HAMSTER, new ResourceLocation("marking"), (stack, world, entity, num) -> {
+                    CompoundTag compoundTag = stack.getTag();
+                    if (compoundTag != null && compoundTag.contains("Marking")) {
+                        return (float) compoundTag.getInt("Marking") / 4;
+                    }
+                    return 0;
+                });
+            }
         }
 
         private static void registerRenderers() {

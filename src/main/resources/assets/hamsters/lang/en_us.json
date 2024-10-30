@@ -8,9 +8,42 @@
   "tooltip.hamsters.tamed": "Tamed",
   "tooltip.hamsters.baby": "Baby",
 
+  "advancements.chocolate_hamster.title": "Sweet & Sinister",
+  "advancements.chocolate_hamster.description": "Obtain a Chocolate Hamster",
+
+
+  "hamsters.midnightconfig.hamstersSquish": "§7Hamsters Squish",
+  "hamsters.midnightconfig.hamstersSquish.tooltip": "§8§o[?]§7§o If Hamsters can be squished by Players, Anvils, falling, etc.",
+  "hamsters.midnightconfig.jumpHurtsHamsters": "§7Jump Hurts Hamsters",
+  "hamsters.midnightconfig.jumpHurtsHamsters.tooltip": "§8§o[?]§7§o If the Player jumping on Hamsters damages them",
+  "hamsters.midnightconfig.hamsterBurst": "§7Hamsters Burst",
+  "hamsters.midnightconfig.hamsterConfetti.tooltip": "§8§o[?]§7§o If Hamsters burst when overfed",
+  "hamsters.midnightconfig.hamsterBurstStyle": "§7Hamster Burst Style",
+  "hamsters.midnightconfig.hamsterBurstStyle.tooltip": "§8§o[?]§7§o The type of effect when Hamsters burst",
+  "hamsters.midnightconfig.enum.BurstStyleEnum.CONFETTI": "Confetti",
+  "hamsters.midnightconfig.enum.BurstStyleEnum.EXPLOSION": "Explosion",
+
+
+  "tooltip.hamsters.recessive": "Recessive",
+    "tooltip.hamsters.banded": "Banded",
+    "tooltip.hamsters.spotted": "Spotted",
+    "tooltip.hamsters.roan": "Roan",
+    "tooltip.hamsters.whitebelly": "Whitebelly",
+
+  "tooltip.hamsters.wild": "Wild",
+  "tooltip.hamsters.white": "White",
+    "tooltip.hamsters.cream": "Cream",
+    "tooltip.hamsters.champagne": "Champagne",
+    "tooltip.hamsters.silver_dove": "Silver Dove",
+    "tooltip.hamsters.dove": "Dove",
+    "tooltip.hamsters.chocolate": "Chocolate",
+    "tooltip.hamsters.black": "Black",
+
+
   "item.hamsters.hamster_spawn_egg": "Hamster Spawn Egg",
   "item.hamsters.hamster_new_spawn_egg": "Hamster Spawn Egg",
   "item.hamsters.seed_mix": "Seed Mix",
+  "item.hamsters.chocolate_hamster": "Hamster au Chocolat",
   "block.hamsters.tunnel": "Tunnel",
   "block.hamsters.hamster_wheel": "Hamster Wheel",
 
@@ -87,13 +120,5 @@
   "hamsters.subtitles.hamster.hurt": "Hamster hurts",
   "hamsters.subtitles.hamster.death": "Hamster dies",
   "hamsters.subtitles.hamster.beg": "Hamster begs",
-  "hamsters.subtitles.hamster.explode": "Hamster explodes",
-
-  "tooltip.hamsters.white": "White",
-  "tooltip.hamsters.peaches_and_cream": "Peaches and Cream",
-  "tooltip.hamsters.orange": "Orange",
-  "tooltip.hamsters.grey_white": "Grey White",
-  "tooltip.hamsters.brown": "Brown",
-  "tooltip.hamsters.black_white": "Black White",
-  "tooltip.hamsters.black": "Black"
+  "hamsters.subtitles.hamster.explode": "Hamster explodes"
 }

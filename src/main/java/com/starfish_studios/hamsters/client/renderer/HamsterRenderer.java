@@ -27,7 +27,6 @@ public class HamsterRenderer extends GeoEntityRenderer<Hamster> {
 
         super(context, new HamsterModel());
         this.shadowRadius = 0.3F;
-
         this.addRenderLayer(new ItemArmorGeoLayer<>(this) {
 
             @Nullable @Override

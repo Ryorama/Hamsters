@@ -9,6 +9,8 @@ import software.bernie.geckolib.core.animatable.model.CoreGeoBone;
 import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.model.DefaultedEntityGeoModel;
 
+import static com.starfish_studios.hamsters.HamstersConfig.*;
+
 @Environment(EnvType.CLIENT)
 public class HamsterNewModel extends DefaultedEntityGeoModel<HamsterNew> {
 
@@ -70,7 +72,10 @@ public class HamsterNewModel extends DefaultedEntityGeoModel<HamsterNew> {
             cheeks.setScaleZ(1.0F);
         }
 
-        if (animatable.getCheekLevel() > 1) root.setRotZ((float) Math.sin(System.currentTimeMillis() * 0.05) * 0.1F * (animatable.getCheekLevel() * 0.05F));
+        if (hamstersBurst) {
+            if (animatable.getCheekLevel() > 1)
+                root.setRotZ((float) Math.sin(System.currentTimeMillis() * 0.05) * 0.1F * (animatable.getCheekLevel() * 0.05F));
+        }
 
         // Ensures there are no strange eye glitches when the hamster is sleeping or awake.
 

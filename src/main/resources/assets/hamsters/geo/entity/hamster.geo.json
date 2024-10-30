@@ -33,6 +33,9 @@
 					"name": "head",
 					"parent": "headRot",
 					"pivot": [-0.5, 3.5, 0],
+					"cubes": [
+						{"origin": [0, 5, -5], "size": [0, 4, 4], "uv": [23, 16]}
+					],
 					"locators": {
 						"lead": [0, 3, -1]
 					}
@@ -42,8 +45,7 @@
 					"parent": "head",
 					"pivot": [0, 2, -2],
 					"cubes": [
-						{"origin": [-2.5, 2, -4], "size": [5, 4, 4], "uv": [1, 11]},
-						{"origin": [0, 5, -5], "size": [0, 4, 4], "uv": [23, 16]}
+						{"origin": [-2.5, 2, -4], "size": [5, 4, 4], "uv": [1, 11]}
 					]
 				},
 				{
@@ -89,6 +91,15 @@
 					"pivot": [0, 1, 0],
 					"cubes": [
 						{"origin": [-2.5, 4, -4.025], "size": [5, 1, 0], "inflate": 0.01, "uv": [5, 22]}
+					]
+				},
+				{
+					"name": "bowtie",
+					"parent": "head",
+					"pivot": [0, 6.25, -3.65],
+					"rotation": [-62.5, 0, 0],
+					"cubes": [
+						{"origin": [-3, 4.75, -3.6], "size": [6, 3, 0], "uv": [16, 25]}
 					]
 				},
 				{

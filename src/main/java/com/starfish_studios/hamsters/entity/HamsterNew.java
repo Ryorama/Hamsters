@@ -7,11 +7,18 @@ import com.starfish_studios.hamsters.entity.common.SleepGoal;
 import com.starfish_studios.hamsters.entity.common.SleepingAnimal;
 import com.starfish_studios.hamsters.entity.common.SmartBodyHelper;
 import com.starfish_studios.hamsters.registry.HamstersEntityType;
+import com.starfish_studios.hamsters.registry.HamstersItems;
 import com.starfish_studios.hamsters.registry.HamstersSoundEvents;
 import com.starfish_studios.hamsters.registry.HamstersTags;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+<<<<<<< Updated upstream
 import net.minecraft.core.SectionPos;
+=======
+>>>>>>> Stashed changes
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -41,9 +48,17 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
+<<<<<<< Updated upstream
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
+=======
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
+>>>>>>> Stashed changes
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -57,6 +72,8 @@ import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import java.util.*;
+
+import static com.starfish_studios.hamsters.HamstersConfig.*;
 
 public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, SleepingAnimal {
 
@@ -75,11 +92,20 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
 
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> MARKING = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
+<<<<<<< Updated upstream
     private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> CHEEK_LEVEL = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SQUISHED_TICKS = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> BIRTH_COUNTDOWN = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> COLLAR_COLOR = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
+=======
+    private static final EntityDataAccessor<Integer> COLLAR_COLOR = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> CHEEK_LEVEL = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> SQUISHED_TICKS = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> BIRTH_COUNTDOWN = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> FROM_HAND = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.BOOLEAN);
+>>>>>>> Stashed changes
 
     private static final Ingredient FOOD_ITEMS = Ingredient.of(HamstersTags.HAMSTER_FOOD);
 
@@ -174,14 +200,29 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         return itemStack.is(HamstersTags.HAMSTER_FOOD) && this.getSquishedTicks() <= 0;
     }
 
+    public void squishHamster() {
+        if (this.getSquishedTicks() <= 0) {
+            this.setSquishedTicks(120);
+            this.playSound(SoundEvents.SLIME_HURT, 1.0F, 1.0F);
+        }
+        if (this.getCheekLevel() > 0) {
+            for (int i = 0; i < this.getCheekLevel(); i++) {
+                ItemEntity seedsItem = new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), new ItemStack(Items.WHEAT_SEEDS));
+                seedsItem.setDeltaMovement(this.getRandom().nextGaussian() * 0.1, this.getRandom().nextGaussian() * 0.2 + 0.2, this.getRandom().nextGaussian() * 0.1);
+                seedsItem.setPickUpDelay(20);
+                this.level().addFreshEntity(seedsItem);
+            }
+            this.setCheekLevel(0);
+        }
+    }
+
     @Override
     public boolean hurt(@NotNull DamageSource damageSource, float damageAmount) {
 
         boolean original = super.hurt(damageSource, damageAmount);
 
         if (original && damageSource.is(DamageTypeTags.IS_FALL)) {
-            this.setSquishedTicks(120);
-            this.playSound(SoundEvents.SLIME_HURT, 1.0F, 1.0F);
+            squishHamster();
         }
 
         return original;
@@ -194,6 +235,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         } else {
             this.setSprinting(false);
         }
+
         super.customServerAiStep();
     }
 
@@ -201,6 +243,19 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
     public void aiStep() {
 
         super.aiStep();
+
+        if (hamstersSquish) {
+            for (Player player : level().getEntitiesOfClass(Player.class, this.getBoundingBox())) {
+                if (!player.onGround() && player.getDeltaMovement().y < 0) {
+                    if (jumpHurtsHamsters) {
+                        if (EnchantmentHelper.getEnchantmentLevel(Enchantments.FALL_PROTECTION, player) == 0 && this.getSquishedTicks() <= 0 || !this.hasCustomName()) {
+                            this.hurt(damageSources().generic(), 1.0F);
+                        }
+                    }
+                    squishHamster();
+                }
+            }
+        }
 
         if (this.getBirthCountdown() > 0) {
             this.setBirthCountdown(this.getBirthCountdown() - 1);
@@ -212,20 +267,23 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
             if (this.getSquishedTicks() == 10) this.playSound(SoundEvents.CHICKEN_EGG, 1.0F, 1.0F);
         }
 
-        if (this.level().isClientSide()) {
-            if (this.getCheekLevel() == 2 && this.tickCount % 10 == 0) {
-                this.level().addParticle(ParticleTypes.SPLASH, this.getX(), this.getY(1.2), this.getZ(), 0.0D, 0.2D, 0.0D);
-                this.playSound(HamstersSoundEvents.HAMSTER_BEG, 1.0F, 1.0F);
-            } else if (this.getCheekLevel() == 3 && this.tickCount % 5 == 0) {
-                this.level().addParticle(ParticleTypes.SPLASH, this.getX(), this.getY(1.2), this.getZ(), 0.0D, 0.2D, 0.0D);
+        if (hamstersBurst) {
+            if (this.level().isClientSide()) {
+                if (this.getCheekLevel() == 2 && this.tickCount % 10 == 0) {
+                    this.level().addParticle(ParticleTypes.SPLASH, this.getX(), this.getY(1.2), this.getZ(), 0.0D, 0.2D, 0.0D);
+                    this.playSound(HamstersSoundEvents.HAMSTER_BEG, 1.0F, 1.0F);
+                } else if (this.getCheekLevel() == 3 && this.tickCount % 5 == 0) {
+                    this.level().addParticle(ParticleTypes.SPLASH, this.getX(), this.getY(1.2), this.getZ(), 0.0D, 0.2D, 0.0D);
+                }
+            } else {
+                if (this.isAlive() && this.getCheekLevel() >= 2 && this.tickCount % (80 - (this.getCheekLevel() * 10)) == 0)
+                    this.playSound(HamstersSoundEvents.HAMSTER_BEG, 1.0F, 1.0F);
             }
-        } else {
-            if (this.isAlive() && this.getCheekLevel() >= 2 && this.tickCount % (80 - (this.getCheekLevel() * 10)) == 0) this.playSound(HamstersSoundEvents.HAMSTER_BEG, 1.0F, 1.0F);
         }
     }
 
     @SuppressWarnings("unused")
-    private ItemStack getFirework(DyeColor dyeColor, int i) {
+    public static ItemStack getFirework(DyeColor dyeColor, int i) {
 
         ItemStack itemStack = new ItemStack(Items.FIREWORK_ROCKET, 1);
         ItemStack fireworkStar = new ItemStack(Items.FIREWORK_STAR);
@@ -279,9 +337,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
                  } else if (this.isFood(itemStack)) {
 
                     // Feeding
-
                     if (player.getCooldowns().isOnCooldown(itemStack.getItem())) return InteractionResult.FAIL;
-                    this.playSound(this.getEatingSound(itemStack));
                     if (!player.getAbilities().instabuild) itemStack.shrink(1);
 
                     if (this.getHealth() < this.getMaxHealth()) {
@@ -292,16 +348,37 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
                         this.ageUp(1);
                         if (this.level() instanceof ServerLevel serverLevel) serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 5, 0.0D, 0.0D, 0.0D, 0.0D);
                     } else {
+                        if (!hamstersBurst) {
+                            if (this.getCheekLevel() == 3) {
+                                return InteractionResult.FAIL;
+                            }
+                        }
 
                         if (this.getCheekLevel() < 3) {
 
                             this.setCheekLevel(this.getCheekLevel() + 1);
                             player.getCooldowns().addCooldown(itemStack.getItem(), 20);
 
-                        } else {
-
-                            this.playSound(HamstersSoundEvents.HAMSTER_EXPLODE);
+                        } else if (hamstersBurst) {
                             this.setHealth(0);
+
+                            if (hamsterBurstStyle == BurstStyleEnum.CONFETTI) {
+                                this.playSound(HamstersSoundEvents.HAMSTER_EXPLODE);
+                                ItemStack fireworkStack = this.getFirework(Util.getRandom(DyeColor.values(), this.getRandom()), this.getRandom().nextInt(3));
+                                FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(this.level(), this, this.getX(), this.getEyeY(), this.getZ(), fireworkStack);
+
+                                fireworkRocketEntity.setSilent(true);
+                                fireworkRocketEntity.setInvisible(true);
+
+                                this.level().addFreshEntity(fireworkRocketEntity);
+                                fireworkRocketEntity.setDeltaMovement(0.0D, 0.0D, 0.0D);
+                            } else if (hamsterBurstStyle == BurstStyleEnum.EXPLOSION) {
+                                this.playSound(SoundEvents.GENERIC_EXPLODE);
+                                if (!this.level().isClientSide) {
+                                    ((ServerLevel) this.level()).sendParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(), this.getZ(), 5, 0.0D, 0.0D, 0.0D, 0.0D);
+                                }
+                                this.level().explode(this, this.getX(), this.getY(), this.getZ(), 2.0F, false, Level.ExplosionInteraction.MOB);
+                            }
 
                             this.level().addFreshEntity(new ExperienceOrb(this.level(), this.getX(), this.getY(), this.getZ(), 3));
 
@@ -310,24 +387,23 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
                                 seedsItem.setDeltaMovement(this.getRandom().nextGaussian() * 0.1, this.getRandom().nextGaussian() * 0.2 + 0.2, this.getRandom().nextGaussian() * 0.1);
                                 this.level().addFreshEntity(seedsItem);
                             }
-
-                            ItemStack fireworkStack = this.getFirework(Util.getRandom(DyeColor.values(), this.getRandom()), this.getRandom().nextInt(3));
-                            FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(this.level(), this, this.getX(), this.getEyeY(), this.getZ(), fireworkStack);
-
-                            fireworkRocketEntity.setSilent(true);
-                            fireworkRocketEntity.setInvisible(true);
-
-                            this.level().addFreshEntity(fireworkRocketEntity);
-                            fireworkRocketEntity.setDeltaMovement(0.0D, 0.0D, 0.0D);
                         }
                     }
-
+                    this.playSound(this.getEatingSound(itemStack));
                     return InteractionResult.SUCCESS;
                 }
 
                 else if (this.isOwnedBy(player)) {
 
+<<<<<<< Updated upstream
                     // Collar Dyeing
+=======
+                     if (player.isShiftKeyDown()) {
+                         this.catchHamster(player);
+                     }
+
+                    // Bow Dyeing
+>>>>>>> Stashed changes
 
                     if (item instanceof DyeItem dyeItem) {
 
@@ -557,12 +633,15 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         return nearbyEntities;
     }
 
+    // BANDED, DOMINANT_SPOTTED, ROAN, WHITEBELLY
+
+
     public enum Marking {
         BLANK (0, "blank"),
         BANDED (1, "banded"),
-        DOMINANT_SPOTS (2, "dominant_spots"),
+        SPOTS(2, "spotted"),
         ROAN (3, "roan"),
-        BELLY (4, "belly");
+        BELLY (4, "whitebelly");
 
         public static final Marking[] BY_ID = Arrays.stream(values()).sorted(Comparator.comparingInt(Marking::getId)).toArray(Marking[]::new);
         private final int id;
@@ -587,6 +666,8 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
             return this.name;
         }
     }
+
+    // WHITE, CREAM, CHAMPAGNE, SILVER_DOVE, DOVE, CHOCOLATE, BLACK, WILD
 
     public enum Variant {
         WHITE (0, "white"),
@@ -624,6 +705,57 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
 
     // endregion
 
+    // region CATCHING
+
+    public InteractionResult catchHamster(Player player) {
+        ItemStack output = this.getCaughtItemStack();
+        saveDefaultDataToItemTag(this, output);
+        if (!player.getInventory().add(output)) {
+            ItemEntity itemEntity = new ItemEntity(level(), this.getX(), this.getY() + 0.5, this.getZ(), output);
+            itemEntity.setPickUpDelay(0);
+            itemEntity.setDeltaMovement(itemEntity.getDeltaMovement().multiply(0, 1, 0));
+            level().addFreshEntity(itemEntity);
+        }
+        this.discard();
+        player.getInventory().add(output);
+        return InteractionResult.sidedSuccess(true);
+    }
+
+    private static void saveDefaultDataToItemTag(HamsterNew mob, ItemStack itemStack) {
+        CompoundTag compoundTag = itemStack.getOrCreateTag();
+        if (mob.hasCustomName()) {
+            itemStack.setHoverName(mob.getCustomName());
+        }
+        try {
+            compoundTag.putShort("Air", (short)mob.getAirSupply());
+            compoundTag.putBoolean("Invulnerable", mob.isInvulnerable());
+            if (mob.isCustomNameVisible()) compoundTag.putBoolean("CustomNameVisible", mob.isCustomNameVisible());
+            if (mob.isSilent()) compoundTag.putBoolean("Silent", mob.isSilent());
+            if (mob.isNoGravity()) compoundTag.putBoolean("NoGravity", mob.isNoGravity());
+            if (mob.hasGlowingTag()) compoundTag.putBoolean("Glowing", true);
+            mob.addAdditionalSaveData(compoundTag);
+        }
+        catch (Throwable var9) {
+            CrashReport crashReport = CrashReport.forThrowable(var9, "Saving entity NBT");
+            CrashReportCategory crashReportCategory = crashReport.addCategory("Entity being saved");
+            mob.fillCrashReportCategory(crashReportCategory);
+            throw new ReportedException(crashReport);
+        }
+    }
+
+    public boolean requiresCustomPersistence() {
+        return super.requiresCustomPersistence() || this.fromHand();
+    }
+
+    public boolean removeWhenFarAway(double distanceToClosestPlayer) {
+        return false;
+    }
+
+    public ItemStack getCaughtItemStack() {
+        return new ItemStack(HamstersItems.HAMSTER);
+    }
+    // endregion
+
     // region Sounds
 
     @Override
@@ -642,10 +774,13 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
 
     protected <E extends HamsterNew> PlayState animController(final AnimationState<E> event) {
         if (this.getSquishedTicks() > 0) {
+            event.setControllerSpeed(1.0F);
             event.setAnimation(SQUISH);
         } else if (this.isSleeping()) {
+            event.setControllerSpeed(1.0F);
             event.setAnimation(SLEEP);
         } else if (this.isInSittingPose()) {
+            event.setControllerSpeed(1.0F);
             event.setAnimation(STANDING);
         }  else if (event.isMoving()) {
             if (this.isSprinting()) {

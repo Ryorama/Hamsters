@@ -1,7 +1,10 @@
 package com.starfish_studios.hamsters;
 
 import com.google.common.reflect.Reflection;
+import com.starfish_studios.hamsters.compat.CreateCompat;
+import com.starfish_studios.hamsters.item.recipe.HamstersRecipeSerializer;
 import com.starfish_studios.hamsters.registry.*;
+import eu.midnightdust.lib.config.MidnightConfig;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceLocation;
@@ -17,7 +20,8 @@ public class Hamsters implements ModInitializer {
 	@Override
 	public void onInitialize() {
 
-		FabricLoader.getInstance().getModContainer("create"	).ifPresent(modContainer -> CreateCompat.setup());
+		MidnightConfig.init(MOD_ID, HamstersConfig.class);
+		FabricLoader.getInstance().getModContainer("create").ifPresent(modContainer -> CreateCompat.setup());
 
 		Reflection.initialize(
 			HamstersItems.class,
@@ -25,7 +29,8 @@ public class Hamsters implements ModInitializer {
 			HamstersEntityType.class,
 			HamstersBlockEntities.class,
 			HamstersSoundEvents.class,
-			HamstersCreativeModeTab.class
+			HamstersCreativeModeTab.class,
+			HamstersRecipeSerializer.class
 		);
 		HamstersVanillaIntegration.serverInit();
 	}

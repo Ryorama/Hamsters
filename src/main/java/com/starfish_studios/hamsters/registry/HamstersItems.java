@@ -1,12 +1,15 @@
 package com.starfish_studios.hamsters.registry;
 
 import com.starfish_studios.hamsters.Hamsters;
+import com.starfish_studios.hamsters.item.ChocolateHamsterItem;
 import com.starfish_studios.hamsters.item.HamsterBallItem;
 import com.starfish_studios.hamsters.item.HamsterItem;
 import com.starfish_studios.hamsters.item.HamsterWheelItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
 import java.util.function.Supplier;
@@ -26,10 +29,13 @@ public class HamstersItems {
 
     public static final Item HAMSTER_SPAWN_EGG = register("hamster_spawn_egg", new SpawnEggItem(HamstersEntityType.HAMSTER, 16747824, 16775119, new FabricItemSettings()));
     public static final Item HAMSTER_NEW_SPAWN_EGG = register("hamster_new_spawn_egg", new SpawnEggItem(HamstersEntityType.HAMSTER_NEW, 16747824, 16775119, new FabricItemSettings()));
-    // public static final Item TUNNEL = register("tunnel", new BlockItem(HamstersBlocks.TUNNEL, new FabricItemSettings()));
+//     public static final Item TUNNEL = register("tunnel", new BlockItem(HamstersBlocks.TUNNEL, new FabricItemSettings()));
 
     public static final Item HAMSTER = register("hamster", new HamsterItem(new FabricItemSettings().stacksTo(1)));
     public static final Item SEED_MIX = register("seed_mix", new Item(new FabricItemSettings()));
+
+    public static final Item CHOCOLATE_HAMSTER = register("chocolate_hamster", new ChocolateHamsterItem(new FabricItemSettings()
+            .food(new FoodProperties.Builder().nutrition(2).saturationMod(0.1F).build())));
 
     // RED, ORANGE, YELLOW, LIME, GREEN, CYAN, BLUE, LIGHT BLUE, PINK, MAGENTA, PURPLE, WHITE, LIGHT GRAY, GRAY, BLACK, BROWN
 

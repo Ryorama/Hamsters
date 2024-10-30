@@ -26,7 +26,7 @@ public class HamsterNewMarkingLayer extends GeoRenderLayer<HamsterNew> {
     private static final Map<HamsterNew.Marking, ResourceLocation> TEXTURES = Util.make(Maps.newHashMap(), hashMap -> {
         hashMap.put(HamsterNew.Marking.BLANK, Hamsters.id("textures/entity/hamster/blank.png"));
         hashMap.put(HamsterNew.Marking.BANDED, Hamsters.id("textures/entity/hamster/banded.png"));
-        hashMap.put(HamsterNew.Marking.DOMINANT_SPOTS, Hamsters.id("textures/entity/hamster/dominant_spots.png"));
+        hashMap.put(HamsterNew.Marking.SPOTS, Hamsters.id("textures/entity/hamster/dominant_spots.png"));
         hashMap.put(HamsterNew.Marking.ROAN, Hamsters.id("textures/entity/hamster/roan.png"));
         hashMap.put(HamsterNew.Marking.BELLY, Hamsters.id("textures/entity/hamster/belly.png"));
     });

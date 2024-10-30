@@ -32,7 +32,7 @@ public class HamstersBlocks {
 
     // region Block Registries
 
-    // public static final Block TUNNEL = register("tunnel", new TunnelBlock(BlockProperties.cagePanel));
+     public static final Block TUNNEL = registerBlock("tunnel", new TunnelBlock(FabricBlockSettings.create().strength(0.6F).noOcclusion().isSuffocating((state, world, pos) -> false).pushReaction(PushReaction.IGNORE)));
 
     public static final Block HAMSTER_WHEEL = registerBlockWithoutBlockItem("hamster_wheel", new HamsterWheelBlock(FabricBlockSettings.create().strength(0.6F).noOcclusion().isSuffocating((state, world, pos) -> false).pushReaction(PushReaction.IGNORE)));
 
