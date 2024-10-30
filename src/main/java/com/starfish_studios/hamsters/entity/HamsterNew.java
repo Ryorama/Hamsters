@@ -15,10 +15,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-<<<<<<< Updated upstream
 import net.minecraft.core.SectionPos;
-=======
->>>>>>> Stashed changes
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -48,17 +45,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
-<<<<<<< Updated upstream
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
-=======
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
->>>>>>> Stashed changes
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -92,20 +86,12 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
 
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> MARKING = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
-<<<<<<< Updated upstream
     private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> CHEEK_LEVEL = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SQUISHED_TICKS = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> BIRTH_COUNTDOWN = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> COLLAR_COLOR = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
-=======
-    private static final EntityDataAccessor<Integer> COLLAR_COLOR = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Integer> CHEEK_LEVEL = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Integer> SQUISHED_TICKS = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Integer> BIRTH_COUNTDOWN = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> FROM_HAND = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.BOOLEAN);
->>>>>>> Stashed changes
 
     private static final Ingredient FOOD_ITEMS = Ingredient.of(HamstersTags.HAMSTER_FOOD);
 
@@ -364,7 +350,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
 
                             if (hamsterBurstStyle == BurstStyleEnum.CONFETTI) {
                                 this.playSound(HamstersSoundEvents.HAMSTER_EXPLODE);
-                                ItemStack fireworkStack = this.getFirework(Util.getRandom(DyeColor.values(), this.getRandom()), this.getRandom().nextInt(3));
+                                ItemStack fireworkStack = getFirework(Util.getRandom(DyeColor.values(), this.getRandom()), this.getRandom().nextInt(3));
                                 FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(this.level(), this, this.getX(), this.getEyeY(), this.getZ(), fireworkStack);
 
                                 fireworkRocketEntity.setSilent(true);
@@ -395,15 +381,12 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
 
                 else if (this.isOwnedBy(player)) {
 
-<<<<<<< Updated upstream
                     // Collar Dyeing
-=======
                      if (player.isShiftKeyDown()) {
                          this.catchHamster(player);
                      }
 
                     // Bow Dyeing
->>>>>>> Stashed changes
 
                     if (item instanceof DyeItem dyeItem) {
 
@@ -514,7 +497,8 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         cheekLevelTag = "CheekLevel",
         squishedTicksTag = "SquishedTicks",
         birthCountdownTag = "BirthCountdown",
-        collarColorTag = "CollarColor"
+        collarColorTag = "CollarColor",
+        caughtTag = "Caught"
     ;
 
     @Override
@@ -527,6 +511,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         this.getEntityData().define(SQUISHED_TICKS, 0);
         this.getEntityData().define(BIRTH_COUNTDOWN, 0);
         this.getEntityData().define(COLLAR_COLOR, 0);
+        this.getEntityData().define(FROM_HAND, false);
     }
 
     @Override
@@ -539,6 +524,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         this.setSquishedTicks(compoundTag.getInt(this.squishedTicksTag));
         this.setBirthCountdown(compoundTag.getInt(this.birthCountdownTag));
         this.setCollarColor(DyeColor.byId(compoundTag.getInt(this.collarColorTag)));
+        this.setFromHand(compoundTag.getBoolean(this.caughtTag));
     }
 
     @Override
@@ -551,6 +537,15 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         compoundTag.putInt(this.squishedTicksTag, this.getSquishedTicks());
         compoundTag.putInt(this.birthCountdownTag, this.getBirthCountdown());
         compoundTag.putInt(this.collarColorTag, this.getCollarColor().getId());
+        compoundTag.putBoolean(this.caughtTag, this.getFromHand());
+    }
+
+    public boolean getFromHand() {
+        return this.getEntityData().get(FROM_HAND);
+    }
+
+    public void setFromHand(boolean fromHand) {
+        this.getEntityData().set(FROM_HAND, fromHand);
     }
 
     public int getVariant() {
@@ -707,7 +702,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
 
     // region CATCHING
 
-    public InteractionResult catchHamster(Player player) {
+    public void catchHamster(Player player) {
         ItemStack output = this.getCaughtItemStack();
         saveDefaultDataToItemTag(this, output);
         if (!player.getInventory().add(output)) {
@@ -718,7 +713,6 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         }
         this.discard();
         player.getInventory().add(output);
-        return InteractionResult.sidedSuccess(true);
     }
 
     private static void saveDefaultDataToItemTag(HamsterNew mob, ItemStack itemStack) {
@@ -744,7 +738,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
     }
 
     public boolean requiresCustomPersistence() {
-        return super.requiresCustomPersistence() || this.fromHand();
+        return super.requiresCustomPersistence() || this.getFromHand();
     }
 
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
