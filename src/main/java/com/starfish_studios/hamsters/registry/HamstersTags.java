@@ -3,6 +3,7 @@ package com.starfish_studios.hamsters.registry;
 import com.starfish_studios.hamsters.Hamsters;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
@@ -18,8 +19,11 @@ public class HamstersTags {
 
     public static final TagKey<Item> CAGE_PANELS = TagKey.create(Registries.ITEM, Hamsters.id("cage_panels"));
     public static final TagKey<Item> HAMSTER_FOOD = TagKey.create(Registries.ITEM, Hamsters.id("hamster_food"));
+    public static final TagKey<Item> HAMSTER_BREEDING_FOOD = TagKey.create(Registries.ITEM, Hamsters.id("hamster_breeding_food"));
 
     public static final TagKey<EntityType<?>> HAMSTER_AVOIDED = TagKey.create(Registries.ENTITY_TYPE, Hamsters.id("hamster_avoided"));
+
+    public static final TagKey<DamageType> SQUISHES_HAMSTERS = TagKey.create(Registries.DAMAGE_TYPE, Hamsters.id("squishes_hamsters"));
 
     public static final TagKey<Biome> HAS_HAMSTER = TagKey.create(Registries.BIOME, Hamsters.id("has_hamster"));
 }
