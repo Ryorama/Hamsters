@@ -21,11 +21,11 @@ public class HamstersBlocks {
     }
 
     public static Block hamsterBowlBlock(DyeColor dyeColor) {
-        return new BowlBlock(FabricBlockSettings.create().strength(0.6F).noOcclusion().isSuffocating(Blocks::never).mapColor(dyeColor).pushReaction(PushReaction.DESTROY));
+        return new HamsterBowlBlock(FabricBlockSettings.create().strength(0.6F).noOcclusion().isSuffocating(Blocks::never).mapColor(dyeColor).pushReaction(PushReaction.DESTROY));
     }
 
     public static Block hamsterBottleBlock(DyeColor dyeColor) {
-        return new BottleBlock(FabricBlockSettings.create().strength(0.6F).noOcclusion().isSuffocating(Blocks::never).mapColor(dyeColor).pushReaction(PushReaction.DESTROY));
+        return new HamsterBottleBlock(FabricBlockSettings.create().strength(0.6F).noOcclusion().isSuffocating(Blocks::never).mapColor(dyeColor).pushReaction(PushReaction.DESTROY));
     }
 
     // endregion

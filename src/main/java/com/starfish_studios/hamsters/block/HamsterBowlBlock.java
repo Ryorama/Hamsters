@@ -18,13 +18,28 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 
-public class BowlBlock extends Block {
+public class HamsterBowlBlock extends Block {
 
     private static final IntegerProperty SEEDS = IntegerProperty.create("seeds", 0, 3);
 
-    public BowlBlock(Properties properties) {
+    public HamsterBowlBlock(Properties properties) {
         super(properties);
         this.registerDefaultState(this.getStateDefinition().any().setValue(SEEDS, 0));
+    }
+
+    @SuppressWarnings("all")
+    public static boolean hasSeeds(BlockState blockState) {
+        return blockState.getValue(SEEDS) > 0;
+    }
+
+    public static void addSeeds(Level level, BlockPos blockPos, BlockState blockState) {
+        if (level.getBlockState(blockPos).getValue(SEEDS) >= 3) return;
+        level.setBlockAndUpdate(blockPos, blockState.setValue(SEEDS, blockState.getValue(SEEDS) + 1));
+    }
+
+    public static void removeSeeds(Level level, BlockPos blockPos, BlockState blockState) {
+        if (level.getBlockState(blockPos).getValue(SEEDS) <= 0) return;
+        level.setBlockAndUpdate(blockPos, blockState.setValue(SEEDS, blockState.getValue(SEEDS) - 1));
     }
 
     @SuppressWarnings("deprecation")
@@ -33,7 +48,7 @@ public class BowlBlock extends Block {
 
         if (player.getItemInHand(interactionHand).is(Items.WHEAT_SEEDS) && blockState.getValue(SEEDS) < 3) {
             level.playSound(player, blockPos, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
-            level.setBlockAndUpdate(blockPos, blockState.setValue(SEEDS, blockState.getValue(SEEDS) + 1));
+            addSeeds(level, blockPos, blockState);
             if (!player.getAbilities().instabuild) player.getItemInHand(interactionHand).shrink(1);
             return InteractionResult.SUCCESS;
         }

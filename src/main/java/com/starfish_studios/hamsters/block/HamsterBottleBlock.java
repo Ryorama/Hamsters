@@ -22,7 +22,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class BottleBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
+public class HamsterBottleBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
 
     private static final VoxelShape NORTH_AABB = Block.box(5, 2, 8, 11, 16, 16);
     private static final VoxelShape SOUTH_AABB = Block.box(5, 2, 0, 11, 16, 8);
@@ -32,7 +32,7 @@ public class BottleBlock extends BaseEntityBlock implements SimpleWaterloggedBlo
     private static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     private static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
-    public BottleBlock(Properties properties) {
+    public HamsterBottleBlock(Properties properties) {
         super(properties);
         this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
     }

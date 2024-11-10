@@ -73,7 +73,7 @@ public class CagePanelBlock extends Block {
 
         BlockPos abovePos = blockPos.above();
 
-        if (player.getItemInHand(interactionHand).is(HamstersTags.CAGE_PANELS) && level.isEmptyBlock(abovePos)) {
+        if (player.getItemInHand(interactionHand).is(HamstersTags.CAGE_PANEL_ITEMS) && level.isEmptyBlock(abovePos)) {
             BlockItem blockItem = (BlockItem) player.getItemInHand(interactionHand).getItem();
             level.setBlock(abovePos, blockItem.getBlock().defaultBlockState().setValue(FACING, blockState.getValue(FACING)), 3);
             level.playSound(null, blockPos, this.getSoundType(blockState).getPlaceSound(), SoundSource.BLOCKS, level.getRandom().nextFloat() * 0.25F + 0.7F, level.getRandom().nextFloat() * 0.1F + 0.9F);

@@ -1,6 +1,7 @@
 package com.starfish_studios.hamsters.entity;
 
 import com.google.common.collect.Lists;
+import com.starfish_studios.hamsters.block.HamsterBowlBlock;
 import com.starfish_studios.hamsters.block.HamsterWheelBlock;
 import com.starfish_studios.hamsters.entity.common.MMPathNavigatorGround;
 import com.starfish_studios.hamsters.entity.common.SleepGoal;
@@ -26,6 +27,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -45,6 +47,8 @@ import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -86,6 +90,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
     private static final EntityDataAccessor<Integer> MARKING = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> SLEEPING_COOLDOWN_TICKS = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> EATING_COOLDOWN_TICKS = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> CHEEK_LEVEL = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SQUISHED_TICKS = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> BIRTH_COUNTDOWN = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
@@ -174,8 +179,11 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
             }
         });
 
+        this.goalSelector.addGoal(10, new HamsterGoToBottleGoal(this, 1.2D, 8));
+        this.goalSelector.addGoal(10, new HamsterGoToBowlGoal(this, 1.2D, 8));
+        this.goalSelector.addGoal(10, new HamsterGoToWheelGoal(this, 1.2D, 8));
+
         this.goalSelector.addGoal(10, new HamsterLookAroundGoal(this));
-        this.goalSelector.addGoal(10, new HamsterMountWheelGoal(this, 1.2D, 8));
         // this.goalSelector.addGoal(10, new GetOnOwnersShoulderGoal(this));
     }
 
@@ -261,6 +269,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
 
         if (getNearbyAvoidedEntities(this).isEmpty() && this.getSleepingCooldownTicks() > 0) this.setSleepingCooldownTicks(this.getSleepingCooldownTicks() - 1);
         if (this.getBirthCountdown() > 0) this.setBirthCountdown(this.getBirthCountdown() - 1);
+        if (this.getEatingCooldownTicks() > 0) this.setEatingCooldownTicks(this.getEatingCooldownTicks() - 1);
 
         if (hamstersBurst) {
             if (this.level().isClientSide()) {
@@ -332,6 +341,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
                  if (itemStack.is(HamstersTags.HAMSTER_BREEDING_FOOD) && this.getAge() == 0 && this.canFallInLove()) {
 
                      this.setInLove(player);
+                     this.playSound(this.getEatingSound(itemStack));
                      return InteractionResult.SUCCESS;
 
                  } else if (this.isFood(itemStack)) {
@@ -343,10 +353,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
                     if (this.getHealth() < this.getMaxHealth()) this.heal(this.getMaxHealth() / 4);
 
                     else if (this.getAge() < 0) {
-
-                        this.ageUp(1);
-                        if (this.level() instanceof ServerLevel serverLevel) serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 5, 0.0D, 0.0D, 0.0D, 0.0D);
-
+                        this.addAgeToHamster();
                     } else {
 
                         if (!hamstersBurst && this.getCheekLevel() == 3) return InteractionResult.FAIL;
@@ -446,6 +453,11 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         }
     }
 
+    private void addAgeToHamster() {
+        this.ageUp(1);
+        if (this.level() instanceof ServerLevel serverLevel) serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 5, 0.0D, 0.0D, 0.0D, 0.0D);
+    }
+
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor serverLevelAccessor, @NotNull DifficultyInstance difficultyInstance, @NotNull MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
 
@@ -505,6 +517,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         markingTag = "Marking",
         sleepingTag = "Sleeping",
         sleepingCooldownTicksTag = "SleepingCooldownTicks",
+        eatingCooldownTicksTag = "EatingCooldownTicks",
         cheekLevelTag = "CheekLevel",
         squishedTicksTag = "SquishedTicks",
         birthCountdownTag = "BirthCountdown",
@@ -519,6 +532,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         this.getEntityData().define(MARKING, 0);
         this.getEntityData().define(SLEEPING, false);
         this.getEntityData().define(SLEEPING_COOLDOWN_TICKS, 200);
+        this.getEntityData().define(EATING_COOLDOWN_TICKS, 0);
         this.getEntityData().define(CHEEK_LEVEL, 0);
         this.getEntityData().define(SQUISHED_TICKS, 0);
         this.getEntityData().define(BIRTH_COUNTDOWN, 0);
@@ -533,6 +547,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         this.setMarking(Marking.BY_ID[compoundTag.getInt(this.markingTag)]);
         this.setSleeping(compoundTag.getBoolean(this.sleepingTag));
         this.setSleepingCooldownTicks(compoundTag.getInt(this.sleepingCooldownTicksTag));
+        this.setEatingCooldownTicks(compoundTag.getInt(this.eatingCooldownTicksTag));
         this.setCheekLevel(compoundTag.getInt(this.cheekLevelTag));
         this.setSquishedTicks(compoundTag.getInt(this.squishedTicksTag));
         this.setBirthCountdown(compoundTag.getInt(this.birthCountdownTag));
@@ -547,6 +562,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         compoundTag.putInt(this.markingTag, this.getMarking());
         compoundTag.putBoolean(this.sleepingTag, this.isSleeping());
         compoundTag.putInt(this.sleepingCooldownTicksTag, this.getSleepingCooldownTicks());
+        compoundTag.putInt(this.eatingCooldownTicksTag, this.getEatingCooldownTicks());
         compoundTag.putInt(this.cheekLevelTag, this.getCheekLevel());
         compoundTag.putInt(this.squishedTicksTag, this.getSquishedTicks());
         compoundTag.putInt(this.birthCountdownTag, this.getBirthCountdown());
@@ -578,7 +594,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
     @Override
     public void setSleeping(boolean isSleeping) {
         this.getEntityData().set(SLEEPING, isSleeping);
-        if (!isSleeping) this.setSleepingCooldownTicks(200);
+        if (!isSleeping) this.setDefaultSleepingCooldown();
     }
 
     public int getSleepingCooldownTicks() {
@@ -587,6 +603,18 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
 
     public void setSleepingCooldownTicks(int sleepingCooldownTicks) {
         this.getEntityData().set(SLEEPING_COOLDOWN_TICKS, sleepingCooldownTicks);
+    }
+
+    private void setDefaultSleepingCooldown() {
+        this.setSleepingCooldownTicks(200);
+    }
+
+    public int getEatingCooldownTicks() {
+        return this.getEntityData().get(EATING_COOLDOWN_TICKS);
+    }
+
+    public void setEatingCooldownTicks(int eatingCooldownTicks) {
+        this.getEntityData().set(EATING_COOLDOWN_TICKS, eatingCooldownTicks);
     }
 
     public int getCheekLevel() {
@@ -636,10 +664,23 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
     }
 
     @Override
+    public boolean startRiding(@NotNull Entity entity) {
+        boolean original = super.startRiding(entity);
+        if (original) this.setSleeping(false);
+        return original;
+    }
+
+    @Override
+    public void stopRiding() {
+        this.setSleeping(false);
+        super.stopRiding();
+    }
+
+    @Override
     public boolean canSleep() {
         long dayTime = this.level().getDayTime();
         if (dayTime > 12000 && dayTime < 23000 || !getNearbyAvoidedEntities(this).isEmpty()) return false;
-        return this.getSleepingCooldownTicks() <= 0 && !this.isInFluid() && this.getSquishedTicks() <= 0 && !level().isThundering();
+        return this.getSleepingCooldownTicks() <= 0 && !this.isInFluid() && !this.isPassenger() && this.getSquishedTicks() <= 0 && !level().isThundering();
     }
 
     private boolean isInFluid() {
@@ -869,9 +910,9 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         }
     }
 
-    public class HamsterMountWheelGoal extends MoveToBlockGoal {
+    public class HamsterGoToBlockGoal extends MoveToBlockGoal {
 
-        public HamsterMountWheelGoal(PathfinderMob pathfinderMob, double speedModifier, int searchRange) {
+        public HamsterGoToBlockGoal(PathfinderMob pathfinderMob, double speedModifier, int searchRange) {
             super(pathfinderMob, speedModifier, searchRange);
         }
 
@@ -895,16 +936,18 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
             return false;
         }
 
-        @Nullable
-        private BlockPos getPosWithHamsterWheel(BlockPos blockPos, BlockGetter blockGetter) {
+        public TagKey<Block> getBlockTag() {
+            return null;
+        }
 
-            if (blockGetter.getBlockState(blockPos).getBlock() instanceof HamsterWheelBlock) {
-                if (HamsterWheelBlock.isOccupied((Level) blockGetter, blockPos)) return null;
-                return blockPos;
-            }
+        @Nullable
+        public BlockPos getPosWithBlock(BlockPos blockPos, BlockGetter blockGetter) {
+
+            if (this.getBlockTag() == null) return null;
+            if (blockGetter.getBlockState(blockPos).is(this.getBlockTag())) return blockPos;
 
             for (BlockPos blocksToCheck : new BlockPos[]{blockPos.below(), blockPos.west(), blockPos.east(), blockPos.north(), blockPos.south(), blockPos.below().below()}) {
-                if (!(blockGetter.getBlockState(blocksToCheck).getBlock() instanceof HamsterWheelBlock)) continue;
+                if (!blockGetter.getBlockState(blocksToCheck).is(this.getBlockTag())) continue;
                 return blocksToCheck;
             }
 
@@ -912,10 +955,29 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         }
 
         @Override
-        protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
+        protected boolean isValidTarget(@NotNull LevelReader levelReader, @NotNull BlockPos blockPos) {
+            if (this.getBlockTag() == null) return false;
             ChunkAccess chunkAccess = levelReader.getChunk(SectionPos.blockToSectionCoord(blockPos.getX()), SectionPos.blockToSectionCoord(blockPos.getZ()), ChunkStatus.FULL, false);
-            if (chunkAccess != null) return chunkAccess.getBlockState(blockPos).getBlock() instanceof HamsterWheelBlock && !HamsterWheelBlock.isOccupied((Level) levelReader, blockPos);
+            if (chunkAccess != null) return chunkAccess.getBlockState(blockPos).is(this.getBlockTag());
             return false;
+        }
+
+        @Override
+        public void stop() {
+            HamsterNew.this.getNavigation().stop();
+            super.stop();
+        }
+    }
+
+    public class HamsterGoToBottleGoal extends HamsterGoToBlockGoal {
+
+        public HamsterGoToBottleGoal(PathfinderMob pathfinderMob, double speedModifier, int searchRange) {
+            super(pathfinderMob, speedModifier, searchRange);
+        }
+
+        @Override
+        public TagKey<Block> getBlockTag() {
+            return HamstersTags.HAMSTER_BOTTLES;
         }
 
         @Override
@@ -923,19 +985,104 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
 
             super.tick();
 
-            BlockPos hamsterWheel = this.getPosWithHamsterWheel(this.mob.blockPosition(), this.mob.level());
+            BlockPos hamsterBottle = this.getPosWithBlock(this.mob.blockPosition(), this.mob.level());
 
-            if (hamsterWheel != null && this.mob.position().distanceTo(Vec3.atBottomCenterOf(hamsterWheel)) <= 1.0D) {
-                HamsterNew.this.setSleeping(false);
-                HamsterWheelBlock.sitDown(this.mob.level(), hamsterWheel, this.mob);
+            if (hamsterBottle != null && this.mob.position().distanceTo(Vec3.atBottomCenterOf(hamsterBottle)) <= 1.0D) {
+                HamsterNew.this.setDefaultSleepingCooldown();
                 this.stop();
             }
         }
+    }
+
+    public class HamsterGoToBowlGoal extends HamsterGoToBlockGoal {
+
+        public HamsterGoToBowlGoal(PathfinderMob pathfinderMob, double speedModifier, int searchRange) {
+            super(pathfinderMob, speedModifier, searchRange);
+        }
 
         @Override
-        public void stop() {
-            HamsterNew.this.getNavigation().stop();
-            super.stop();
+        public TagKey<Block> getBlockTag() {
+            return HamstersTags.HAMSTER_BOWLS;
+        }
+
+        @Override
+        public BlockPos getPosWithBlock(BlockPos blockPos, BlockGetter blockGetter) {
+            BlockState blockState = blockGetter.getBlockState(blockPos);
+            if (blockState.is(this.getBlockTag()) && !HamsterBowlBlock.hasSeeds(blockState)) return null;
+            return super.getPosWithBlock(blockPos, blockGetter);
+        }
+
+        @Override
+        protected boolean isValidTarget(@NotNull LevelReader levelReader, @NotNull BlockPos blockPos) {
+            BlockState blockState = levelReader.getBlockState(blockPos);
+            if (blockState.is(this.getBlockTag()) && !HamsterBowlBlock.hasSeeds(blockState) || this.isHamsterFull()) return false;
+            return super.isValidTarget(levelReader, blockPos);
+        }
+
+        private boolean isHamsterFull() {
+            return HamsterNew.this.getCheekLevel() >= 3 || HamsterNew.this.getEatingCooldownTicks() > 0;
+        }
+
+        @Override
+        public void tick() {
+
+            super.tick();
+
+            BlockPos hamsterBowl = this.getPosWithBlock(this.mob.blockPosition(), this.mob.level());
+
+            if (hamsterBowl != null && this.mob.position().distanceTo(Vec3.atBottomCenterOf(hamsterBowl)) <= 1.0D && !this.isHamsterFull()) {
+
+                HamsterNew.this.setDefaultSleepingCooldown();
+
+                BlockState blockState = this.mob.level().getBlockState(hamsterBowl);
+                if (blockState.getBlock() instanceof HamsterBowlBlock) HamsterBowlBlock.removeSeeds(this.mob.level(), hamsterBowl, blockState);
+
+                HamsterNew.this.playSound(HamsterNew.this.getEatingSound(Items.AIR.getDefaultInstance()));
+                HamsterNew.this.setCheekLevel(HamsterNew.this.getCheekLevel() + 1);
+                if (HamsterNew.this.getHealth() < HamsterNew.this.getMaxHealth()) HamsterNew.this.heal(HamsterNew.this.getMaxHealth() / 4);
+                if (HamsterNew.this.getAge() < 0) HamsterNew.this.addAgeToHamster();
+
+                HamsterNew.this.setEatingCooldownTicks(200);
+                this.stop();
+            }
+        }
+    }
+
+    public class HamsterGoToWheelGoal extends HamsterGoToBlockGoal {
+
+        public HamsterGoToWheelGoal(PathfinderMob pathfinderMob, double speedModifier, int searchRange) {
+            super(pathfinderMob, speedModifier, searchRange);
+        }
+
+        @Override
+        public TagKey<Block> getBlockTag() {
+            return HamstersTags.HAMSTER_WHEELS;
+        }
+
+        @Override
+        public BlockPos getPosWithBlock(BlockPos blockPos, BlockGetter blockGetter) {
+            if (blockGetter.getBlockState(blockPos).is(this.getBlockTag()) && HamsterWheelBlock.isOccupied((Level) blockGetter, blockPos)) return null;
+            return super.getPosWithBlock(blockPos, blockGetter);
+        }
+
+        @Override
+        protected boolean isValidTarget(@NotNull LevelReader levelReader, @NotNull BlockPos blockPos) {
+            if (HamsterWheelBlock.isOccupied((Level) levelReader, blockPos)) return false;
+            return super.isValidTarget(levelReader, blockPos);
+        }
+
+        @Override
+        public void tick() {
+
+            super.tick();
+
+            BlockPos hamsterWheel = this.getPosWithBlock(this.mob.blockPosition(), this.mob.level());
+
+            if (hamsterWheel != null && this.mob.position().distanceTo(Vec3.atBottomCenterOf(hamsterWheel)) <= 1.0D) {
+                HamsterNew.this.setDefaultSleepingCooldown();
+                HamsterWheelBlock.sitDown(this.mob.level(), hamsterWheel, this.mob);
+                this.stop();
+            }
         }
     }
 
