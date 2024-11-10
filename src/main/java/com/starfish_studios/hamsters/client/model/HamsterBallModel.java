@@ -44,11 +44,6 @@ public class HamsterBallModel extends DefaultedEntityGeoModel<HamsterBall> {
         super.setCustomAnimations(animatable, instanceId, animationState);
 
         if (animationState == null) return;
-
         CoreGeoBone root = this.getAnimationProcessor().getBone("root");
-
-//        if (animatable.getDeltaMovement().x() != 0 || animatable.getDeltaMovement().z() != 0) {
-//            root.setRotX(15);
-//        }
     }
 }

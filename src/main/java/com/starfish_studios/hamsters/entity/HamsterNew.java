@@ -1006,6 +1006,12 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         }
 
         @Override
+        public boolean canUse() {
+            if (HamsterNew.this.getCheekLevel() >= 3 || HamsterNew.this.getEatingCooldownTicks() > 0) return false;
+            return super.canUse();
+        }
+
+        @Override
         public BlockPos getPosWithBlock(BlockPos blockPos, BlockGetter blockGetter) {
             BlockState blockState = blockGetter.getBlockState(blockPos);
             if (blockState.is(this.getBlockTag()) && !HamsterBowlBlock.hasSeeds(blockState)) return null;
@@ -1015,12 +1021,8 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         @Override
         protected boolean isValidTarget(@NotNull LevelReader levelReader, @NotNull BlockPos blockPos) {
             BlockState blockState = levelReader.getBlockState(blockPos);
-            if (blockState.is(this.getBlockTag()) && !HamsterBowlBlock.hasSeeds(blockState) || this.isHamsterFull()) return false;
+            if (blockState.is(this.getBlockTag()) && !HamsterBowlBlock.hasSeeds(blockState)) return false;
             return super.isValidTarget(levelReader, blockPos);
-        }
-
-        private boolean isHamsterFull() {
-            return HamsterNew.this.getCheekLevel() >= 3 || HamsterNew.this.getEatingCooldownTicks() > 0;
         }
 
         @Override
@@ -1030,7 +1032,7 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
 
             BlockPos hamsterBowl = this.getPosWithBlock(this.mob.blockPosition(), this.mob.level());
 
-            if (hamsterBowl != null && this.mob.position().distanceTo(Vec3.atBottomCenterOf(hamsterBowl)) <= 1.0D && !this.isHamsterFull()) {
+            if (hamsterBowl != null && this.mob.position().distanceTo(Vec3.atBottomCenterOf(hamsterBowl)) <= 1.0D) {
 
                 HamsterNew.this.setDefaultSleepingCooldown();
 
