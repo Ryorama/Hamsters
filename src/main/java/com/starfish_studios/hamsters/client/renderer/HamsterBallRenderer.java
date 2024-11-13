@@ -34,7 +34,6 @@ public class HamsterBallRenderer extends GeoEntityRenderer<HamsterBall> {
 
     @Override
     protected void applyRotations(HamsterBall animatable, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
-        poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - rotationYaw));
         float hitRotation = (float) (animatable.level().getGameTime() - animatable.lastHit) + partialTick;
         if (hitRotation < 5.0F) poseStack.mulPose(Axis.YP.rotationDegrees(Mth.sin(hitRotation / 1.5F * (float) Math.PI) * 5.0F).normalize());
         super.applyRotations(animatable, poseStack, ageInTicks, rotationYaw, partialTick);

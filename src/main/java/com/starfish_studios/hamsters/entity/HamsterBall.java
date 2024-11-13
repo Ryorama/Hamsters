@@ -114,14 +114,29 @@ public class HamsterBall extends LivingEntity implements HamstersGeoEntity {
     // region Movement
 
     @Override
-    public void travel(@NotNull Vec3 vec3) {
-        if (this.onGround()) this.setDeltaMovement(this.getDeltaMovement().multiply(1.2D, 1.0D, 1.2D));
-        super.travel(vec3);
+    public void tick() {
+
+        super.tick();
+
+        Vec3 movement = this.getDeltaMovement();
+        if (movement.horizontalDistance() > 0) this.setXRot(this.getXRot() + 0.1F);
     }
 
     @Override
-    protected @NotNull Vec3 getRiddenInput(@NotNull Player player, @NotNull Vec3 vec3) {
-        return new Vec3(0.0D, 0.0D, 1.0D);
+    public void travel(@NotNull Vec3 vec3) {
+        if (!this.isInWater()) {
+
+            float friction = 0.98F;
+            float frictionMultiplier = this.onGround() ? friction * 0.9F : 0.9F;
+            Vec3 movement = this.handleRelativeFrictionAndCalculateMovement(vec3, friction);
+
+            double y = movement.y();
+            if (!this.level().isClientSide() && !this.isNoGravity()) y -= 0.08D;
+            this.setDeltaMovement(movement.x() * (double) frictionMultiplier, y * (double) 0.98F, movement.z() * (double) frictionMultiplier);
+
+        } else {
+            super.travel(vec3);
+        }
     }
 
     @Override
