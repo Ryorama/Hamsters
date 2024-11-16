@@ -1,7 +1,6 @@
 package com.starfish_studios.hamsters.entity;
 
 import com.starfish_studios.hamsters.entity.common.HamstersGeoEntity;
-import com.starfish_studios.hamsters.registry.HamstersEntityType;
 import com.starfish_studios.hamsters.registry.HamstersItems;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
@@ -140,23 +139,8 @@ public class HamsterBall extends LivingEntity implements HamstersGeoEntity {
     }
 
     @Override
-    protected void positionRider(@NotNull Entity entity, Entity.@NotNull MoveFunction moveFunction) {
-        super.positionRider(entity, moveFunction);
-        if (entity instanceof Hamster) entity.setPos(this.getX(), this.getY() + 0.125F, this.getZ());
-    }
-
-    @Override
-    protected void tickRidden(@NotNull Player player, @NotNull Vec3 vec3) {
-
-        LivingEntity controllingPassenger = this.getControllingPassenger();
-        assert controllingPassenger != null;
-
-        if (controllingPassenger.getType() == HamstersEntityType.HAMSTER && controllingPassenger != player) {
-            this.setRot(controllingPassenger.getYRot(), controllingPassenger.getXRot() * 0.5F);
-            this.yRotO = this.yBodyRot = this.yHeadRot = this.getYRot();
-        }
-
-        super.tickRidden(player, vec3);
+    public double getPassengersRidingOffset() {
+        return super.getPassengersRidingOffset() * 0.2D;
     }
 
     // endregion

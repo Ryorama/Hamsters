@@ -77,14 +77,14 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
 
-    protected static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.sf_nba.hamster.idle");
-    protected static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.sf_nba.hamster.walk");
-    protected static final RawAnimation PINKIE_WALK = RawAnimation.begin().thenLoop("animation.sf_nba.hamster.pinkie_walk");
-    protected static final RawAnimation RUN = RawAnimation.begin().thenLoop("animation.sf_nba.hamster.run");
-    protected static final RawAnimation SLEEP = RawAnimation.begin().thenLoop("animation.sf_nba.hamster.sleep");
-    protected static final RawAnimation STANDING = RawAnimation.begin().thenLoop("animation.sf_nba.hamster.standing");
-    protected static final RawAnimation SQUISH = RawAnimation.begin().thenPlay("animation.sf_nba.hamster.squish")
-    .thenPlayXTimes("animation.sf_nba.hamster.squished", 5).thenPlay("animation.sf_nba.hamster.unsquish");
+    protected static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.idle");
+    protected static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.walk");
+    protected static final RawAnimation PINKIE_WALK = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.pinkie_walk");
+    protected static final RawAnimation RUN = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.run");
+    protected static final RawAnimation SLEEP = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.sleep");
+    protected static final RawAnimation STANDING = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.standing");
+    protected static final RawAnimation SQUISH = RawAnimation.begin().thenPlay("animation.sf_hba.hamster.squish")
+    .thenPlayXTimes("animation.sf_hba.hamster.squished", 5).thenPlay("animation.sf_hba.hamster.unsquish");
 
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> MARKING = SynchedEntityData.defineId(HamsterNew.class, EntityDataSerializers.INT);
@@ -183,7 +183,8 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         this.goalSelector.addGoal(10, new HamsterGoToBowlGoal(this, 1.2D, 8));
         this.goalSelector.addGoal(10, new HamsterGoToWheelGoal(this, 1.2D, 8));
 
-        this.goalSelector.addGoal(10, new HamsterLookAroundGoal(this));
+        this.goalSelector.addGoal(11, new HamsterDismountGoal(this));
+        this.goalSelector.addGoal(11, new HamsterLookAroundGoal(this));
         // this.goalSelector.addGoal(10, new GetOnOwnersShoulderGoal(this));
     }
 
@@ -665,8 +666,14 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
 
     @Override
     public boolean startRiding(@NotNull Entity entity) {
+
         boolean original = super.startRiding(entity);
-        if (original) this.setSleeping(false);
+
+        if (original) {
+            this.setSleeping(false);
+            this.setOrderedToSit(false);
+        }
+
         return original;
     }
 
@@ -881,16 +888,16 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
 
     public static class HamsterLookAroundGoal extends RandomLookAroundGoal {
 
-        private final Mob mob;
+        private final HamsterNew hamster;
 
-        public HamsterLookAroundGoal(Mob mob) {
-            super(mob);
-            this.mob = mob;
+        public HamsterLookAroundGoal(HamsterNew hamster) {
+            super(hamster);
+            this.hamster = hamster;
         }
 
         @Override
         public void tick() {
-            if (this.mob instanceof HamsterNew hamsterNew && hamsterNew.getSquishedTicks() > 0) return;
+            if (this.hamster.getSquishedTicks() > 0) return;
             super.tick();
         }
     }
@@ -919,8 +926,8 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
         @Override
         public boolean canUse() {
 
-            if (this.mob instanceof HamsterNew hamsterNew && (!hamsterNew.isTame() || hamsterNew.level().isRainingAt(hamsterNew.blockPosition()) ||
-            hamsterNew.isSleeping() || hamsterNew.isInSittingPose() || hamsterNew.getSquishedTicks() > 0)) return false;
+            if (this.mob instanceof HamsterNew hamster && (!hamster.isTame() || hamster.level().isRainingAt(hamster.blockPosition()) ||
+            hamster.isSleeping() || hamster.isInSittingPose() || hamster.getSquishedTicks() > 0 || hamster.getVehicle() != null)) return false;
 
             if (this.nextStartTick > 0) {
                 --this.nextStartTick;
@@ -1085,6 +1092,32 @@ public class HamsterNew extends ShoulderRidingEntity implements GeoEntity, Sleep
                 HamsterWheelBlock.sitDown(this.mob.level(), hamsterWheel, this.mob);
                 this.stop();
             }
+        }
+    }
+
+    public static class HamsterDismountGoal extends Goal {
+
+        private final HamsterNew hamster;
+
+        public HamsterDismountGoal(HamsterNew hamster) {
+            this.hamster = hamster;
+        }
+
+        @Override
+        public boolean canUse() {
+            return this.hamster.getVehicle() != null && this.hamster.getCheekLevel() == 0;
+        }
+
+        @Override
+        public void tick() {
+            this.hamster.stopRiding();
+            this.stop();
+        }
+
+        @Override
+        public void stop() {
+            this.hamster.getNavigation().stop();
+            super.stop();
         }
     }
 

@@ -1,7 +1,7 @@
 {
 	"format_version": "1.8.0",
 	"animations": {
-		"animation.sf_nba.hamster.dance": {
+		"animation.sf_hba.hamster.dance": {
 			"loop": true,
 			"animation_length": 2.2,
 			"bones": {
@@ -832,7 +832,7 @@
 				}
 			}
 		},
-		"animation.sf_nba.hamster.dance2": {
+		"animation.sf_hba.hamster.dance2": {
 			"loop": true,
 			"animation_length": 2,
 			"bones": {
@@ -1654,7 +1654,7 @@
 				}
 			}
 		},
-		"animation.sf_nba.hamster.dance3": {
+		"animation.sf_hba.hamster.dance3": {
 			"loop": true,
 			"animation_length": 1.2,
 			"bones": {
@@ -2561,7 +2561,7 @@
 				}
 			}
 		},
-		"animation.sf_nba.hamster.pinkie_walk": {
+		"animation.sf_hba.hamster.pinkie_walk": {
 			"loop": true,
 			"animation_length": 0.7,
 			"bones": {
@@ -2675,7 +2675,7 @@
 				}
 			}
 		},
-		"animation.sf_nba.hamster.squish": {
+		"animation.sf_hba.hamster.squish": {
 			"animation_length": 0.25,
 			"bones": {
 				"root": {
@@ -2862,7 +2862,7 @@
 				}
 			}
 		},
-		"animation.sf_nba.hamster.squished": {
+		"animation.sf_hba.hamster.squished": {
 			"animation_length": 1,
 			"bones": {
 				"root": {
@@ -2894,7 +2894,7 @@
 				}
 			}
 		},
-		"animation.sf_nba.hamster.unsquish": {
+		"animation.sf_hba.hamster.unsquish": {
 			"animation_length": 0.25,
 			"bones": {
 				"root": {
