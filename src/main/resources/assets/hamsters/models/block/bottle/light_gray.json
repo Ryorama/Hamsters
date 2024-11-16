@@ -1,6 +1,6 @@
 {
     "parent": "hamsters:block/template/bottle",
     "textures": {
-        "all": "hamsters:block/bottle/light_gray"
+        "all": "hamsters:block/bottle/light_gray_bottle"
     }
 }

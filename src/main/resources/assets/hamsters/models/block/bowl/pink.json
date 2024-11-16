@@ -1,6 +1,6 @@
 {
     "parent": "hamsters:block/template/bowl",
     "textures": {
-        "all": "hamsters:block/bowl/pink"
+        "all": "hamsters:block/bowl/pink_bowl"
     }
 }
