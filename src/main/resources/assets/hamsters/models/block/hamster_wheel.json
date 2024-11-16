@@ -2,8 +2,8 @@
   "credit": "Made with Blockbench",
   "parent": "builtin/entity",
   "textures": {
-    "1": "hamsters:block/hamster_wheel",
-    "particle": "hamsters:block/hamster_wheel"
+    "1": "hamsters:block/hamster_wheel/copper",
+    "particle": "hamsters:block/hamster_wheel/copper"
   },
   "texture_size": [
     48,
