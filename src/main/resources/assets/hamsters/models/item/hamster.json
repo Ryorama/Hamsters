@@ -1,7 +1,7 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "hamsters:item/hamster/wild"
+    "layer0": "hamsters:item/hamster/white"
   },
   "overrides": [
     {"predicate": {"variant": 0.0, "marking": 0.0}, "model": "hamsters:item/hamster/white"},

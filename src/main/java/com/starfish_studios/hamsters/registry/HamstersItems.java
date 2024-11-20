@@ -1,19 +1,17 @@
 package com.starfish_studios.hamsters.registry;
 
 import com.starfish_studios.hamsters.Hamsters;
-import com.starfish_studios.hamsters.item.ChocolateHamsterItem;
-import com.starfish_studios.hamsters.item.HamsterBallItem;
-import com.starfish_studios.hamsters.item.HamsterItem;
-import com.starfish_studios.hamsters.item.HamsterWheelItem;
+import com.starfish_studios.hamsters.items.ChocolateHamsterItem;
+import com.starfish_studios.hamsters.items.HamsterBallItem;
+import com.starfish_studios.hamsters.items.HamsterItem;
+import com.starfish_studios.hamsters.items.HamsterWheelItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
-import java.util.function.Supplier;
 
-@SuppressWarnings("all")
 public class HamstersItems {
 
     // region Common Properties
@@ -26,17 +24,14 @@ public class HamstersItems {
 
     // region Item Registries
 
-    public static final Item HAMSTER_SPAWN_EGG = register("hamster_spawn_egg", new SpawnEggItem(HamstersEntityType.HAMSTER, 16747824, 16775119, new FabricItemSettings()));
-    public static final Item HAMSTER_NEW_SPAWN_EGG = register("hamster_new_spawn_egg", new SpawnEggItem(HamstersEntityType.HAMSTER_NEW, 16747824, 16775119, new FabricItemSettings()));
+    public static final Item HAMSTER_SPAWN_EGG = register("hamster_spawn_egg", new SpawnEggItem(HamstersEntityTypes.HAMSTER, 16747824, 16775119, new FabricItemSettings()));
     // public static final Item TUNNEL = register("tunnel", new BlockItem(HamstersBlocks.TUNNEL, new FabricItemSettings()));
 
-    public static final Item HAMSTER = register("hamster", new HamsterItem(new FabricItemSettings().stacksTo(1)));
     public static final Item SEED_MIX = register("seed_mix", new Item(new FabricItemSettings()));
 
-    public static final Item CHOCOLATE_HAMSTER = register("chocolate_hamster", new ChocolateHamsterItem(new FabricItemSettings()
+    public static final Item HAMSTER = register("hamster", new HamsterItem(new FabricItemSettings().stacksTo(1)));
+    public static final Item CHOCOLATE_HAMSTER = register("chocolate_hamster", new ChocolateHamsterItem(new FabricItemSettings().stacksTo(1)
     .food(new FoodProperties.Builder().nutrition(2).saturationMod(0.1F).build())));
-
-    // RED, ORANGE, YELLOW, LIME, GREEN, CYAN, BLUE, LIGHT BLUE, PINK, MAGENTA, PURPLE, WHITE, LIGHT GRAY, GRAY, BLACK, BROWN
 
     public static final Item RED_HAMSTER_BALL = register("red_hamster_ball", hamsterBallItem());
     public static final Item ORANGE_HAMSTER_BALL = register("orange_hamster_ball", hamsterBallItem());
@@ -59,17 +54,7 @@ public class HamstersItems {
 
     // endregion
 
-//    public static Supplier<Item> registerCaughtMobItem(String name, EntityType entitySupplier, Supplier<? extends Fluid> fluidSupplier, SoundEvent soundSupplier, int variantAmount) {
-//        return registerItem(name, () ->  new HamsterItem(entitySupplier, fluidSupplier.get(), soundSupplier, variantAmount, new Item.Properties().stacksTo(1)));
-//    }
-
-    @SuppressWarnings("unused")
-    public static <T extends Item> Supplier<T> registerItem(String id, Supplier<T> item) {
-        T registry = Registry.register(BuiltInRegistries.ITEM, Hamsters.id(id), item.get());
-        return () -> registry;
-    }
-
-    private static Item register(String id, Item item) {
-        return Registry.register(BuiltInRegistries.ITEM, Hamsters.id(id), item);
+    private static Item register(String name, Item item) {
+        return Registry.register(BuiltInRegistries.ITEM, Hamsters.id(name), item);
     }
 }

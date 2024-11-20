@@ -2,7 +2,7 @@ package com.starfish_studios.hamsters.client.model.shoulder;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.starfish_studios.hamsters.entity.HamsterNew;
+import com.starfish_studios.hamsters.entities.Hamster;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
 @SuppressWarnings("all")
-public class RightSittingHamsterModel<T extends HamsterNew> extends EntityModel<T> {
+public class RightSittingHamsterModel<T extends Hamster> extends EntityModel<T> {
 
     private final ModelPart root;
     private final ModelPart body;

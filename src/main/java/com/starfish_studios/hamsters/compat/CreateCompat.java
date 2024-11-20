@@ -6,6 +6,6 @@ import com.starfish_studios.hamsters.Hamsters;
 public class CreateCompat {
 
     public static void setup(){
-        BlockStressDefaults.DEFAULT_CAPACITIES.put(Hamsters.id("hamster_wheel"), 16.0);
+        BlockStressDefaults.DEFAULT_CAPACITIES.put(Hamsters.id("hamster_wheel"), 16.0D);
     }
 }

@@ -1,7 +1,7 @@
 package com.starfish_studios.hamsters.registry;
 
 import com.starfish_studios.hamsters.Hamsters;
-import com.starfish_studios.hamsters.block.*;
+import com.starfish_studios.hamsters.blocks.*;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.core.Registry;
@@ -11,7 +11,6 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.material.PushReaction;
 
-@SuppressWarnings("unused")
 public class HamstersBlocks {
 
     // region Common Properties
@@ -32,11 +31,10 @@ public class HamstersBlocks {
 
     // region Block Registries
 
-     public static final Block TUNNEL = registerBlock("tunnel", new TunnelBlock(FabricBlockSettings.create().strength(0.6F).noOcclusion().isSuffocating((state, world, pos) -> false).pushReaction(PushReaction.IGNORE)));
+    @SuppressWarnings("unused")
+    public static final Block TUNNEL = registerBlock("tunnel", new TunnelBlock(FabricBlockSettings.create().strength(0.6F).noOcclusion().isSuffocating((state, world, pos) -> false).pushReaction(PushReaction.IGNORE)));
 
     public static final Block HAMSTER_WHEEL = registerBlockWithoutBlockItem("hamster_wheel", new HamsterWheelBlock(FabricBlockSettings.create().strength(0.6F).noOcclusion().isSuffocating((state, world, pos) -> false).pushReaction(PushReaction.IGNORE)));
-
-    // RED, ORANGE, YELLOW, LIME, GREEN, CYAN, BLUE, LIGHT BLUE, PINK, MAGENTA, PURPLE, WHITE, LIGHT GRAY, GRAY, BLACK, BROWN
 
     public static final Block CAGE_PANEL = registerBlock("cage_panel", cagePanelBlock(DyeColor.WHITE));
     public static final Block RED_CAGE_PANEL = registerBlock("red_cage_panel", cagePanelBlock(DyeColor.RED));
@@ -97,12 +95,12 @@ public class HamstersBlocks {
         return Registry.register(BuiltInRegistries.BLOCK, Hamsters.id(name), block);
     }
 
-    private static Block registerBlock(String id, Block block) {
-        registerBlockItem(id, block);
-        return Registry.register(BuiltInRegistries.BLOCK, Hamsters.id(id), block);
+    private static Block registerBlock(String name, Block block) {
+        registerBlockItem(name, block);
+        return Registry.register(BuiltInRegistries.BLOCK, Hamsters.id(name), block);
     }
 
-    private static void registerBlockItem(String id, Block block) {
-        Registry.register(BuiltInRegistries.ITEM, Hamsters.id(id), new BlockItem(block, new FabricItemSettings()));
+    private static void registerBlockItem(String name, Block block) {
+        Registry.register(BuiltInRegistries.ITEM, Hamsters.id(name), new BlockItem(block, new FabricItemSettings()));
     }
 }

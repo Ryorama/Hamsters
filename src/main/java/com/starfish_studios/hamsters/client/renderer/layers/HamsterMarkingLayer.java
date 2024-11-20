@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.starfish_studios.hamsters.Hamsters;
-import com.starfish_studios.hamsters.entity.Hamster;
+import com.starfish_studios.hamsters.entities.Hamster;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -19,32 +19,27 @@ import java.util.Map;
 @Environment(EnvType.CLIENT)
 public class HamsterMarkingLayer extends GeoRenderLayer<Hamster> {
 
-    public HamsterMarkingLayer(GeoRenderer<Hamster> entityRendererIn) {
-        super(entityRendererIn);
+    public HamsterMarkingLayer(GeoRenderer<Hamster> geoRenderer) {
+        super(geoRenderer);
     }
 
     private static final Map<Hamster.Marking, ResourceLocation> TEXTURES = Util.make(Maps.newHashMap(), hashMap -> {
-        hashMap.put(Hamster.Marking.BLANK, Hamsters.id("textures/entity/hamster/blank.png"));
         hashMap.put(Hamster.Marking.BANDED, Hamsters.id("textures/entity/hamster/banded.png"));
-        hashMap.put(Hamster.Marking.DOMINANT_SPOTS, Hamsters.id("textures/entity/hamster/dominant_spots.png"));
+        hashMap.put(Hamster.Marking.SPOTTED, Hamsters.id("textures/entity/hamster/spotted.png"));
         hashMap.put(Hamster.Marking.ROAN, Hamsters.id("textures/entity/hamster/roan.png"));
-        hashMap.put(Hamster.Marking.BELLY, Hamsters.id("textures/entity/hamster/belly.png"));
+        hashMap.put(Hamster.Marking.WHITEBELLY, Hamsters.id("textures/entity/hamster/whitebelly.png"));
     });
 
     @Override
-    public ResourceLocation getTextureResource(Hamster animatable) {
-        if (Hamster.Marking.byId(animatable.getMarking()) != Hamster.Marking.BLANK) return TEXTURES.get(Hamster.Marking.byId(animatable.getMarking()));
-        return Hamsters.id("textures/entity/hamster/blank.png");
+    public ResourceLocation getTextureResource(Hamster hamster) {
+        if (Hamster.Marking.BY_ID[hamster.getMarking()] != Hamster.Marking.BLANK) return TEXTURES.get(Hamster.Marking.BY_ID[hamster.getMarking()]);
+        return null;
     }
 
     @Override
-    public void render(PoseStack poseStack, Hamster animatable, BakedGeoModel bakedModel, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
-
-        if (Hamster.Marking.byId(animatable.getMarking()) != Hamster.Marking.BLANK && !animatable.isBaby()) {
-            RenderType entityTranslucent = RenderType.entityTranslucent(getTextureResource(animatable));
-            this.getRenderer().actuallyRender(poseStack, animatable, bakedModel, renderType, bufferSource, bufferSource.getBuffer(entityTranslucent), true, partialTick, packedLight, packedOverlay, 1f, 1f, 1f, 1f);
-        }
-
-        super.render(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
+    public void render(PoseStack poseStack, Hamster hamster, BakedGeoModel bakedModel, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
+        super.render(poseStack, hamster, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
+        if (Hamster.Marking.BY_ID[hamster.getMarking()] == Hamster.Marking.BLANK) return;
+        this.getRenderer().actuallyRender(poseStack, hamster, bakedModel, renderType, bufferSource, bufferSource.getBuffer(RenderType.entityTranslucent(this.getTextureResource(hamster))), true, partialTick, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, 1.0F);
     }
 }

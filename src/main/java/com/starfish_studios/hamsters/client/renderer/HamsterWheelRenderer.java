@@ -1,6 +1,6 @@
 package com.starfish_studios.hamsters.client.renderer;
 
-import com.starfish_studios.hamsters.block.entity.HamsterWheelBlockEntity;
+import com.starfish_studios.hamsters.blocks.entity.HamsterWheelBlockEntity;
 import com.starfish_studios.hamsters.client.model.HamsterWheelModel;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

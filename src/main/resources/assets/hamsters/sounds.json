@@ -49,7 +49,7 @@
 	},
 	"entity.hamster.explode": {
 		"sounds": [
-		  "hamsters:yay"
+		  "hamsters:entity/hamster/yay"
 		],
 		"subtitle": "hamsters.subtitles.hamster.explode"
 	}

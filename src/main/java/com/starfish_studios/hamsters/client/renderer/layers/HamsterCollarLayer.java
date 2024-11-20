@@ -3,45 +3,40 @@ package com.starfish_studios.hamsters.client.renderer.layers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.starfish_studios.hamsters.Hamsters;
-import com.starfish_studios.hamsters.entity.HamsterNew;
+import com.starfish_studios.hamsters.entities.Hamster;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.DyeColor;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
 @Environment(EnvType.CLIENT)
-public class HamsterCollarLayer extends GeoRenderLayer<HamsterNew> {
+public class HamsterCollarLayer extends GeoRenderLayer<Hamster> {
 
-    public HamsterCollarLayer(GeoRenderer<HamsterNew> entityRendererIn) {
-        super(entityRendererIn);
+    public HamsterCollarLayer(GeoRenderer<Hamster> geoRenderer) {
+        super(geoRenderer);
     }
 
     @Override
-    public void render(PoseStack poseStack, HamsterNew animatable, BakedGeoModel bakedModel, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
+    public void render(PoseStack poseStack, Hamster hamster, BakedGeoModel bakedModel, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay) {
 
-        ResourceLocation COLLAR = new ResourceLocation(Hamsters.MOD_ID, "textures/entity/hamster/collar.png");
-        ResourceLocation COLLAR_TAG = new ResourceLocation(Hamsters.MOD_ID, "textures/entity/hamster/collar_tag.png");
+        if (hamster.isTame() && !hamster.isInvisible()) {
 
+            RenderType collarRenderer = RenderType.entityCutout(Hamsters.id("textures/entity/hamster/collar.png"));
+            RenderType collarTagRenderer = RenderType.entityCutout(Hamsters.id("textures/entity/hamster/collar_tag.png"));
+            float[] color = hamster.getCollarColor().getTextureDiffuseColors();
 
-        if (animatable.isTame() && !animatable.isInvisible()) {
-            RenderType renderType1 = RenderType.entityCutout(COLLAR);
-            RenderType renderType2 = RenderType.entityCutout(COLLAR_TAG);
+            this.getRenderer().reRender(this.getDefaultBakedModel(hamster), poseStack, bufferSource, hamster, collarRenderer,
+            bufferSource.getBuffer(collarRenderer), partialTick, packedLight, packedOverlay,
+            color[0], color[1], color[2], 1);
 
-            float[] fs = animatable.getCollarColor().getTextureDiffuseColors();
-            this.getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, renderType1,
-                    bufferSource.getBuffer(renderType1), partialTick, packedLight, packedOverlay,
-                    fs[0], fs[1], fs[2], 1);
-            this.getRenderer().reRender(getDefaultBakedModel(animatable), poseStack, bufferSource, animatable, renderType2,
-                    bufferSource.getBuffer(renderType2), partialTick, packedLight, packedOverlay,
-                    1, 1, 1, 1);
+            this.getRenderer().reRender(this.getDefaultBakedModel(hamster), poseStack, bufferSource, hamster, collarTagRenderer,
+            bufferSource.getBuffer(collarTagRenderer), partialTick, packedLight, packedOverlay,
+            1, 1, 1, 1);
         }
 
-
+        super.render(poseStack, hamster, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay);
     }
 }

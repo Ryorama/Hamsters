@@ -1,7 +1,7 @@
 package com.starfish_studios.hamsters.client.model;
 
 import com.starfish_studios.hamsters.Hamsters;
-import com.starfish_studios.hamsters.entity.HamsterBall;
+import com.starfish_studios.hamsters.entities.HamsterBall;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.RenderType;
@@ -18,23 +18,23 @@ public class HamsterBallModel extends DefaultedEntityGeoModel<HamsterBall> {
     }
 
     @Override
-    public ResourceLocation getModelResource(HamsterBall animatable) {
+    public ResourceLocation getModelResource(HamsterBall hamsterBall) {
         return Hamsters.id("geo/entity/hamster_ball.geo.json");
     }
 
     @Override
-    public ResourceLocation getTextureResource(HamsterBall animatable) {
+    public ResourceLocation getTextureResource(HamsterBall hamsterBall) {
         return Hamsters.id("textures/entity/ball/blue.png");
     }
 
     @Override
-    public ResourceLocation getAnimationResource(HamsterBall animatable) {
+    public ResourceLocation getAnimationResource(HamsterBall hamsterBall) {
         return Hamsters.id("animations/hamster_ball.animation.json");
     }
 
     @Override
-    public RenderType getRenderType(HamsterBall animatable, ResourceLocation texture) {
-        return RenderType.entityTranslucent(texture);
+    public RenderType getRenderType(HamsterBall hamsterBall, ResourceLocation resourceLocation) {
+        return RenderType.entityTranslucent(resourceLocation);
     }
 
     @SuppressWarnings("all")

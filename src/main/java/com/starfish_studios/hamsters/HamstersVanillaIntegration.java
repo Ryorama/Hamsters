@@ -2,14 +2,12 @@ package com.starfish_studios.hamsters;
 
 import com.starfish_studios.hamsters.client.model.shoulder.LeftSittingHamsterModel;
 import com.starfish_studios.hamsters.client.renderer.*;
-import com.starfish_studios.hamsters.item.HamsterItem;
 import com.starfish_studios.hamsters.registry.HamstersBlocks;
-import com.starfish_studios.hamsters.registry.HamstersEntityType;
+import com.starfish_studios.hamsters.registry.HamstersEntityTypes;
 import com.starfish_studios.hamsters.registry.HamstersItems;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -32,47 +30,25 @@ public class HamstersVanillaIntegration {
     public static class Client {
 
         public static void clientInit() {
-            registerModelLayers();
+            registerEntityModelLayers();
+            registerEntityRenderers();
             registerBlockRenderLayers();
-            registerRenderers();
             registerItemModelPredicates();
         }
 
-        private static void registerItemModelPredicates() {
-            for (int i = 0; i < 8; i++) {
-                ItemProperties.register(HamstersItems.HAMSTER, new ResourceLocation("variant"), (stack, world, entity, num) -> {
-                    CompoundTag compoundTag = stack.getTag();
-                    if (compoundTag != null && compoundTag.contains("Variant")) {
-                        return (float) compoundTag.getInt("Variant") / 7;
-                    }
-                    return 0;
-                });
-            }
-
-            for (int i = 0; i < 5; i++) {
-                ItemProperties.register(HamstersItems.HAMSTER, new ResourceLocation("marking"), (stack, world, entity, num) -> {
-                    CompoundTag compoundTag = stack.getTag();
-                    if (compoundTag != null && compoundTag.contains("Marking")) {
-                        return (float) compoundTag.getInt("Marking") / 4;
-                    }
-                    return 0;
-                });
-            }
-        }
-
-        private static void registerRenderers() {
-            registerEntityRenderers(HamstersEntityType.SEAT, SeatRenderer::new);
-        }
-
-        private static void registerModelLayers() {
-            EntityRendererRegistry.register(HamstersEntityType.HAMSTER, HamsterRenderer::new);
-            EntityRendererRegistry.register(HamstersEntityType.HAMSTER_NEW, HamsterNewRenderer::new);
+        private static void registerEntityModelLayers() {
+            EntityRendererRegistry.register(HamstersEntityTypes.HAMSTER, HamsterRenderer::new);
             EntityModelLayerRegistry.registerModelLayer(HAMSTER_LAYER, LeftSittingHamsterModel::createBodyLayer);
-            EntityRendererRegistry.register(HamstersEntityType.HAMSTER_BALL, HamsterBallRenderer::new);
+            EntityRendererRegistry.register(HamstersEntityTypes.HAMSTER_BALL, HamsterBallRenderer::new);
+        }
+
+        private static void registerEntityRenderers() {
+            createEntityRenderer(HamstersEntityTypes.SEAT, SeatRenderer::new);
         }
 
         private static void registerBlockRenderLayers() {
             BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(),
+
                 HamstersBlocks.CAGE_PANEL,
                 HamstersBlocks.RED_CAGE_PANEL,
                 HamstersBlocks.ORANGE_CAGE_PANEL,
@@ -90,6 +66,7 @@ public class HamstersVanillaIntegration {
                 HamstersBlocks.GRAY_CAGE_PANEL,
                 HamstersBlocks.BLACK_CAGE_PANEL,
                 HamstersBlocks.BROWN_CAGE_PANEL,
+
                 HamstersBlocks.RED_HAMSTER_BOWL,
                 HamstersBlocks.ORANGE_HAMSTER_BOWL,
                 HamstersBlocks.YELLOW_HAMSTER_BOWL,
@@ -108,10 +85,31 @@ public class HamstersVanillaIntegration {
                 HamstersBlocks.BROWN_HAMSTER_BOWL
             );
         }
+
+        private static void registerItemModelPredicates() {
+
+            for (int layers = 0; layers < 8; layers++) {
+                ItemProperties.register(HamstersItems.HAMSTER, new ResourceLocation("variant"), (itemStack, level, entity, value) -> {
+                    CompoundTag compoundTag = itemStack.getTag();
+                    String variantTag = "Variant";
+                    if (compoundTag != null && compoundTag.contains(variantTag)) return (float) compoundTag.getInt(variantTag) / 7;
+                    return 0;
+                });
+            }
+
+            for (int layers = 0; layers < 5; layers++) {
+                ItemProperties.register(HamstersItems.HAMSTER, new ResourceLocation("marking"), (itemStack, level, entity, value) -> {
+                    CompoundTag compoundTag = itemStack.getTag();
+                    String markingTag = "Marking";
+                    if (compoundTag != null && compoundTag.contains(markingTag)) return (float) compoundTag.getInt(markingTag) / 4;
+                    return 0;
+                });
+            }
+        }
     }
 
     @SuppressWarnings("all")
-    private static <T extends Entity> void registerEntityRenderers(Supplier<EntityType<T>> type, EntityRendererProvider<T> renderProvider) {
+    private static <T extends Entity> void createEntityRenderer(Supplier<EntityType<T>> type, EntityRendererProvider<T> renderProvider) {
         EntityRendererRegistry.register(type.get(), renderProvider);
     }
 }

@@ -1,12 +1,11 @@
 {
-	"credit": "Made with Blockbench",
 	"textures": {
 		"side": "hamsters:block/tunnel/green/side",
-		"opening": "hamsters:block/tunnel/green/opening",
+		"inside_side": "hamsters:block/tunnel/green/inside_side",
 		"top": "hamsters:block/tunnel/green/top",
 		"inside_top": "hamsters:block/tunnel/green/inside_top",
-		"particle": "hamsters:block/tunnel/green/inside_side",
-		"inside_side": "hamsters:block/tunnel/green/inside_side"
+		"opening": "hamsters:block/tunnel/green/opening",
+		"particle": "#opening"
 	},
 	"elements": [
 		{

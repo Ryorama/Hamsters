@@ -1,7 +1,7 @@
 package com.starfish_studios.hamsters.client.model;
 
 import com.starfish_studios.hamsters.Hamsters;
-import com.starfish_studios.hamsters.block.entity.HamsterWheelBlockEntity;
+import com.starfish_studios.hamsters.blocks.entity.HamsterWheelBlockEntity;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.DefaultedBlockGeoModel;

@@ -17,16 +17,16 @@ public class CreateMixinPlugin implements IMixinConfigPlugin {
     }
 
     @Override
-    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return mixinClassName.contains("create");
+    public List<String> getMixins() {
+        return List.of();
     }
 
     @Override
     public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {}
 
     @Override
-    public List<String> getMixins() {
-        return List.of();
+    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        return mixinClassName.contains("create");
     }
 
     @Override

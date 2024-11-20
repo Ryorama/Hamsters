@@ -29,8 +29,8 @@ public class HamstersSoundEvents {
         registerSoundEvent(blockString + name + ".fall"));
     }
 
-    private static SoundEvent registerSoundEvent(String id) {
-        ResourceLocation resourceLocation = Hamsters.id(id);
+    private static SoundEvent registerSoundEvent(String name) {
+        ResourceLocation resourceLocation = Hamsters.id(name);
         return Registry.register(BuiltInRegistries.SOUND_EVENT, resourceLocation, SoundEvent.createVariableRangeEvent(resourceLocation));
     }
 }

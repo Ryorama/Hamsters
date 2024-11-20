@@ -2,7 +2,7 @@ package com.starfish_studios.hamsters.client.model.shoulder;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.starfish_studios.hamsters.entity.HamsterNew;
+import com.starfish_studios.hamsters.entities.Hamster;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
 @SuppressWarnings("all")
-public class LeftSittingHamsterModel<T extends HamsterNew> extends EntityModel<T> {
+public class LeftSittingHamsterModel<T extends Hamster> extends EntityModel<T> {
 
     // TODO: There should probably be only one hamster model that changes the positioning based on if its on your right or left shoulder similar to parrots.
 
