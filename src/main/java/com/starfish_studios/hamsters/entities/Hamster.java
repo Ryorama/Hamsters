@@ -23,7 +23,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
@@ -39,7 +38,6 @@ import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
@@ -71,11 +69,11 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 import java.util.*;
 import static com.starfish_studios.hamsters.HamstersConfig.*;
 
-public class Hamster extends ShoulderRidingEntity implements GeoEntity, SleepingAnimal {
+public class Hamster extends TamableAnimal implements GeoEntity, SleepingAnimal {
 
     // region Initialization
 
-    public Hamster(EntityType<? extends ShoulderRidingEntity> entityType, Level level) {
+    public Hamster(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
         this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
         this.setPathfindingMalus(BlockPathTypes.WATER_BORDER, 16.0F);
@@ -129,8 +127,7 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
         this.goalSelector.addGoal(11, new LookAtPlayerGoal(this, Player.class, 6.0F) {
             @Override
             public void tick() {
-                if (this.mob instanceof Hamster hamster && hamster.getSquishedTicks() > 0) return;
-                super.tick();
+                if (this.mob instanceof Hamster hamster && hamster.canUseMovementGoals()) super.tick();
             }
         });
 
@@ -186,6 +183,7 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
         CHEEK_LEVEL = SynchedEntityData.defineId(Hamster.class, EntityDataSerializers.INT),
         EATING_COOLDOWN_TICKS = SynchedEntityData.defineId(Hamster.class, EntityDataSerializers.INT),
         SLEEPING_COOLDOWN_TICKS = SynchedEntityData.defineId(Hamster.class, EntityDataSerializers.INT),
+        MOUNT_COOLDOWN_TICKS = SynchedEntityData.defineId(Hamster.class, EntityDataSerializers.INT),
         DISMOUNT_COOLDOWN_TICKS = SynchedEntityData.defineId(Hamster.class, EntityDataSerializers.INT),
         BIRTH_COUNTDOWN = SynchedEntityData.defineId(Hamster.class, EntityDataSerializers.INT),
         SQUISHED_TICKS = SynchedEntityData.defineId(Hamster.class, EntityDataSerializers.INT)
@@ -201,8 +199,8 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
         markingTag = "marking",
         collarColorTag = "collar_color",
         cheekLevelTag = "cheek_level",
-        eatingCooldownTicksTag = "eating_cooldown_ticks",
         sleepingCooldownTicksTag = "sleeping_cooldown_ticks",
+        mountCooldownTicksTag = "mount_cooldown_ticks",
         dismountCooldownTicksTag = "dismount_cooldown_ticks",
         birthCountdownTag = "birth_countdown",
         squishedTicksTag = "squished_ticks",
@@ -219,6 +217,7 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
         this.getEntityData().define(CHEEK_LEVEL, 0);
         this.getEntityData().define(EATING_COOLDOWN_TICKS, 0);
         this.getEntityData().define(SLEEPING_COOLDOWN_TICKS, 200);
+        this.getEntityData().define(MOUNT_COOLDOWN_TICKS, 0);
         this.getEntityData().define(DISMOUNT_COOLDOWN_TICKS, 0);
         this.getEntityData().define(BIRTH_COUNTDOWN, 0);
         this.getEntityData().define(SQUISHED_TICKS, 0);
@@ -233,8 +232,8 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
         compoundTag.putInt(this.markingTag, this.getMarking());
         compoundTag.putInt(this.collarColorTag, this.getCollarColor().getId());
         compoundTag.putInt(this.cheekLevelTag, this.getCheekLevel());
-        compoundTag.putInt(this.eatingCooldownTicksTag, this.getEatingCooldownTicks());
         compoundTag.putInt(this.sleepingCooldownTicksTag, this.getSleepingCooldownTicks());
+        compoundTag.putInt(this.mountCooldownTicksTag, this.getMountCooldownTicks());
         compoundTag.putInt(this.dismountCooldownTicksTag, this.getDismountCooldownTicks());
         compoundTag.putInt(this.birthCountdownTag, this.getBirthCountdown());
         compoundTag.putInt(this.squishedTicksTag, this.getSquishedTicks());
@@ -249,8 +248,8 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
         this.setMarking(Marking.BY_ID[compoundTag.getInt(this.markingTag)]);
         this.setCollarColor(DyeColor.byId(compoundTag.getInt(this.collarColorTag)));
         this.setCheekLevel(compoundTag.getInt(this.cheekLevelTag));
-        this.setEatingCooldownTicks(compoundTag.getInt(this.eatingCooldownTicksTag));
         this.setSleepingCooldownTicks(compoundTag.getInt(this.sleepingCooldownTicksTag));
+        this.setMountCooldownTicks(compoundTag.getInt(this.mountCooldownTicksTag));
         this.setDismountCooldownTicks(compoundTag.getInt(this.dismountCooldownTicksTag));
         this.setBirthCountdown(compoundTag.getInt(this.birthCountdownTag));
         this.setSquishedTicks(compoundTag.getInt(this.squishedTicksTag));
@@ -290,14 +289,6 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
         this.getEntityData().set(CHEEK_LEVEL, cheekLevel);
     }
 
-    private int getEatingCooldownTicks() {
-        return this.getEntityData().get(EATING_COOLDOWN_TICKS);
-    }
-
-    private void setEatingCooldownTicks(int eatingCooldownTicks) {
-        this.getEntityData().set(EATING_COOLDOWN_TICKS, eatingCooldownTicks);
-    }
-
     private int getSleepingCooldownTicks() {
         return this.getEntityData().get(SLEEPING_COOLDOWN_TICKS);
     }
@@ -308,6 +299,14 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
 
     private void setDefaultSleepingCooldown() {
         this.setSleepingCooldownTicks(200);
+    }
+
+    private int getMountCooldownTicks() {
+        return this.getEntityData().get(MOUNT_COOLDOWN_TICKS);
+    }
+
+    private void setMountCooldownTicks(int mountCooldownTicks) {
+        this.getEntityData().set(MOUNT_COOLDOWN_TICKS, mountCooldownTicks);
     }
 
     private int getDismountCooldownTicks() {
@@ -448,35 +447,31 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
     }
 
     private <E extends Hamster> PlayState animController(final AnimationState<E> event) {
-        if (this.getSquishedTicks() > 0) {
-            event.setControllerSpeed(1.0F);
+
+        float animationSpeed = 1.0F;
+
+        if (this.getSquishedTicks() > 0) { // Squished Animation
             event.setAnimation(SQUISH);
-        } else if (this.isSleeping()) {
-            event.setControllerSpeed(1.0F);
+        } else if (this.isSleeping()) { // Sleeping Animation
             event.setAnimation(SLEEP);
-        } else if (this.isInSittingPose()) {
-            event.setControllerSpeed(1.0F);
+        } else if (this.isInSittingPose()) { // Sitting Animation
             event.setAnimation(STANDING);
-        } else if (event.isMoving()) {
+        } else if (event.isMoving()) { // Moving Animations
             if (this.isSprinting()) {
-                event.setControllerSpeed(1.3F);
+                animationSpeed = 1.3F;
                 event.setAnimation(RUN);
             } else {
-                if (this.isBaby()) {
-                    event.setControllerSpeed(1.1F);
-                    event.setAnimation(PINKIE_WALK);
-                } else {
-                    event.setControllerSpeed(1.1F * event.getLimbSwingAmount());
-                    event.setAnimation(WALK);
-                }
+                animationSpeed = this.isBaby() ? 1.1F : 1.1F * event.getLimbSwingAmount();
+                event.setAnimation(this.isBaby() ? PINKIE_WALK : WALK);
             }
-        } else if (this.isInWheel()) {
-            event.setControllerSpeed(1.4F);
+        } else if (this.isInWheel()) { // Wheel Animation
+            animationSpeed = 1.4F;
             event.setAnimation(WALK);
-        } else {
+        } else { // Idle Animation
             event.setAnimation(IDLE);
         }
 
+        event.setControllerSpeed(animationSpeed);
         return PlayState.CONTINUE;
     }
 
@@ -501,12 +496,12 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
         if (this.getSquishedTicks() > 0) {
             this.setSquishedTicks(this.getSquishedTicks() - 1);
             this.setDeltaMovement(0.0D, 0.0D, 0.0D);
-            if (this.getSquishedTicks() == 10) this.playSound(SoundEvents.CHICKEN_EGG, 1.0F, 1.0F);
+            if (this.getSquishedTicks() == 10) this.playSound(HamstersSoundEvents.HAMSTER_UNSQUISH);
         }
 
         if (this.isInWheel() && this.getCheekLevel() > 0 && this.tickCount % 100 == 0) this.setCheekLevel(this.getCheekLevel() - 1);
-        if (this.getEatingCooldownTicks() > 0) this.setEatingCooldownTicks(this.getEatingCooldownTicks() - 1);
         if (getNearbyAvoidedEntities(this).isEmpty() && this.getSleepingCooldownTicks() > 0) this.setSleepingCooldownTicks(this.getSleepingCooldownTicks() - 1);
+        if (this.getMountCooldownTicks() > 0) this.setMountCooldownTicks(this.getMountCooldownTicks() - 1);
         if (this.getDismountCooldownTicks() > 0) this.setDismountCooldownTicks(this.getDismountCooldownTicks() - 1);
         if (this.getBirthCountdown() > 0) this.setBirthCountdown(this.getBirthCountdown() - 1);
 
@@ -514,18 +509,19 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
             if (this.level().isClientSide()) {
                 if (this.getCheekLevel() == 2 && this.tickCount % 10 == 0) {
                     this.level().addParticle(ParticleTypes.SPLASH, this.getX(), this.getY(1.2), this.getZ(), 0.0D, 0.2D, 0.0D);
-                    this.playSound(HamstersSoundEvents.HAMSTER_BEG, 1.0F, 1.0F);
+                    this.playSound(HamstersSoundEvents.HAMSTER_BEG);
                 } else if (this.getCheekLevel() == 3 && this.tickCount % 5 == 0) {
                     this.level().addParticle(ParticleTypes.SPLASH, this.getX(), this.getY(1.2), this.getZ(), 0.0D, 0.2D, 0.0D);
                 }
             } else {
-                if (this.isAlive() && this.getCheekLevel() >= 2 && this.tickCount % (80 - (this.getCheekLevel() * 10)) == 0) this.playSound(HamstersSoundEvents.HAMSTER_BEG, 1.0F, 1.0F);
+                if (this.isAlive() && this.getCheekLevel() >= 2 && this.tickCount % (80 - (this.getCheekLevel() * 10)) == 0) this.playSound(HamstersSoundEvents.HAMSTER_BEG);
             }
         }
     }
 
     @Override
     public void customServerAiStep() {
+
         if (this.getMoveControl().hasWanted()) {
             this.setSprinting(this.getMoveControl().getSpeedModifier() >= 1.3D);
         } else {
@@ -554,7 +550,7 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
 
         if (this.getSquishedTicks() <= 0) {
             this.setSquishedTicks(120);
-            this.playSound(SoundEvents.SLIME_HURT, 1.0F, 1.0F);
+            this.playSound(HamstersSoundEvents.HAMSTER_SQUISH);
         }
 
         if (this.getCheekLevel() > 0) {
@@ -592,6 +588,7 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
     @Override
     public void stopRiding() {
         this.setSleeping(false);
+        this.setMountCooldownTicks(200);
         super.stopRiding();
     }
 
@@ -601,7 +598,7 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
 
     @Override
     public boolean isFood(ItemStack itemStack) {
-        return itemStack.is(HamstersTags.HAMSTER_FOOD) && this.getSquishedTicks() <= 0;
+        return itemStack.is(HamstersTags.HAMSTER_FOOD) && this.canUseMovementGoals();
     }
 
     @Override
@@ -612,7 +609,7 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
 
         if (this.level().isClientSide()) {
 
-            boolean canInteract = this.isOwnedBy(player) || this.isTame() || itemStack.is(HamstersTags.HAMSTER_FOOD) && !this.isTame();
+            boolean canInteract = this.isOwnedBy(player) || this.isTame() || this.isFood(itemStack) && !this.isTame();
             return canInteract ? InteractionResult.CONSUME : InteractionResult.PASS;
 
         } else {
@@ -657,7 +654,7 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
 
                             for (int seedItems = 0; seedItems < 4; seedItems++) {
                                 ItemEntity seedsItem = new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), new ItemStack(Items.WHEAT_SEEDS));
-                                seedsItem.setDeltaMovement(this.getRandom().nextGaussian() * 0.1, this.getRandom().nextGaussian() * 0.2 + 0.2, this.getRandom().nextGaussian() * 0.1);
+                                seedsItem.setDeltaMovement(this.getRandom().nextGaussian() * 0.1D, this.getRandom().nextGaussian() * 0.2D + 0.2D, this.getRandom().nextGaussian() * 0.1D);
                                 this.level().addFreshEntity(seedsItem);
                             }
                         } else {
@@ -875,7 +872,7 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
 
     @Override
     public @NotNull SoundEvent getEatingSound(@NotNull ItemStack itemStack) {
-        return SoundEvents.PARROT_EAT;
+        return HamstersSoundEvents.HAMSTER_EAT;
     }
 
     // endregion
@@ -899,7 +896,7 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
     public boolean canSleep() {
         long dayTime = this.level().getDayTime();
         if (dayTime > 12000 && dayTime < 23000 || !getNearbyAvoidedEntities(this).isEmpty()) return false;
-        return this.getSleepingCooldownTicks() <= 0 && !this.isInFluid() && !this.isPassenger() && this.getSquishedTicks() <= 0 && !level().isThundering();
+        return this.getSleepingCooldownTicks() <= 0 && this.canUseMovementGoals() && !this.isInFluid() && !this.isPassenger() && !level().isThundering();
     }
 
     public static List<LivingEntity> getNearbyAvoidedEntities(LivingEntity livingEntity) {
@@ -911,6 +908,10 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
         if (!nearbyEntities.isEmpty() && nearbyEntities.get(0) instanceof Player player && (hamster.isTame() || player.isCreative() || player.isCrouching())) return emptyList;
 
         return nearbyEntities;
+    }
+
+    private boolean canUseMovementGoals() {
+        return this.getSquishedTicks() <= 0 && !this.isSleeping();
     }
 
     // endregion
@@ -928,12 +929,11 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
 
         @Override
         public void tick() {
-            if (this.hamster.getSquishedTicks() > 0) return;
-            super.tick();
+            if (this.hamster.canUseMovementGoals()) super.tick();
         }
     }
 
-    static class HamsterTemptGoal extends TemptGoal {
+    public static class HamsterTemptGoal extends TemptGoal {
 
         private final Hamster hamster;
 
@@ -957,8 +957,8 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
         @Override
         public boolean canUse() {
 
-            if (this.mob instanceof Hamster hamster && (!hamster.isTame() || hamster.level().isRainingAt(hamster.blockPosition()) ||
-            hamster.isSleeping() || hamster.isInSittingPose() || hamster.getSquishedTicks() > 0 || hamster.getVehicle() != null)) return false;
+            if (this.mob instanceof Hamster hamster && (!hamster.canUseMovementGoals() || !hamster.isTame() ||
+            hamster.level().isRainingAt(hamster.blockPosition()) || hamster.isInSittingPose() || hamster.getVehicle() != null)) return false;
 
             if (this.nextStartTick > 0) {
                 --this.nextStartTick;
@@ -1043,10 +1043,18 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
             return HamstersTags.HAMSTER_BOWLS;
         }
 
+        private boolean canEatFromBowl() {
+            return Hamster.this.getCheekLevel() <= 0;
+        }
+
         @Override
         public boolean canUse() {
-            if (Hamster.this.getCheekLevel() >= 3 || Hamster.this.getEatingCooldownTicks() > 0) return false;
-            return super.canUse();
+            return super.canUse() && this.canEatFromBowl();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return super.canContinueToUse() && this.canEatFromBowl();
         }
 
         @Override
@@ -1067,6 +1075,7 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
         public void tick() {
 
             super.tick();
+            if (!this.canEatFromBowl()) return;
 
             BlockPos hamsterBowl = this.getPosWithBlock(this.mob.blockPosition(), this.mob.level());
 
@@ -1082,7 +1091,6 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
                 if (Hamster.this.getHealth() < Hamster.this.getMaxHealth()) Hamster.this.heal(Hamster.this.getMaxHealth() / 4);
                 if (Hamster.this.getAge() < 0) Hamster.this.addAgeToHamster();
 
-                Hamster.this.setEatingCooldownTicks(200);
                 this.stop();
             }
         }
@@ -1097,6 +1105,11 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
         @Override
         public TagKey<Block> getBlockTag() {
             return HamstersTags.HAMSTER_WHEELS;
+        }
+
+        @Override
+        public boolean canUse() {
+            return super.canUse() && Hamster.this.getMountCooldownTicks() <= 0;
         }
 
         @Override
@@ -1136,7 +1149,7 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
 
         @Override
         public boolean canUse() {
-            return this.hamster.getVehicle() != null && this.hamster.getDismountCooldownTicks() == 0 && this.hamster.getCheekLevel() == 0;
+            return this.hamster.getVehicle() != null && this.hamster.getDismountCooldownTicks() <= 0 && this.hamster.getCheekLevel() <= 0;
         }
 
         @Override
@@ -1161,41 +1174,6 @@ public class Hamster extends ShoulderRidingEntity implements GeoEntity, Sleeping
         @Override
         public boolean canUse() {
             return super.canUse() && Hamster.this.getCheekLevel() <= 0 && Hamster.getNearbyAvoidedEntities(this.mob).isEmpty();
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public static class GetOnOwnersShoulderGoal extends Goal {
-
-        private final ShoulderRidingEntity entity;
-        private ServerPlayer owner;
-        private boolean isSittingOnShoulder;
-
-        public GetOnOwnersShoulderGoal(ShoulderRidingEntity shoulderRidingEntity) {
-            this.entity = shoulderRidingEntity;
-        }
-
-        @Override
-        public boolean canUse() {
-            ServerPlayer serverPlayer = (ServerPlayer) this.entity.getOwner();
-            boolean canSitOnPlayer = serverPlayer != null && !serverPlayer.isSpectator() && !serverPlayer.isInWater() && !serverPlayer.isInPowderSnow;
-            return !this.entity.isOrderedToSit() && canSitOnPlayer && this.entity.canSitOnShoulder();
-        }
-
-        @Override
-        public boolean isInterruptable() {
-            return !this.isSittingOnShoulder;
-        }
-
-        @Override
-        public void start() {
-            this.owner = (ServerPlayer) this.entity.getOwner();
-            this.isSittingOnShoulder = false;
-        }
-
-        @Override
-        public void tick() {
-            if (!this.isSittingOnShoulder && !this.entity.isInSittingPose() && !this.entity.isLeashed() && this.entity.getBoundingBox().intersects(this.owner.getBoundingBox())) this.isSittingOnShoulder = this.entity.setEntityOnShoulder(this.owner);
         }
     }
 

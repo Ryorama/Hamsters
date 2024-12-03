@@ -105,6 +105,9 @@
   "hamsters.subtitles.hamster.beg": "Hamster begs",
   "hamsters.subtitles.hamster.eat": "Hamster eats",
   "hamsters.subtitles.hamster.explode": "Hamster explodes",
+  "hamsters.subtitles.hamster.sleep": "Hamster sleeps",
+  "hamsters.subtitles.hamster.squish": "Hamster squishes",
+  "hamsters.subtitles.hamster.unsquish": "Hamster pops up",
 
   "advancements.chocolate_hamster.title": "Sweet & Sinister",
   "advancements.chocolate_hamster.description": "Obtain a Chocolate Hamster",

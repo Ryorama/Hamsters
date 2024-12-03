@@ -23,7 +23,7 @@ public class HamstersTags {
 
         HAMSTER_FOOD = registerItemTag("hamster_food"),
         HAMSTER_BREEDING_FOOD = registerItemTag("hamster_breeding_food"),
-        HAMSTER_BOWL_FOOD = registerItemTag("hamster_breeding_food")
+        HAMSTER_BOWL_FOOD = registerItemTag("hamster_bowl_food")
     ;
 
     // endregion

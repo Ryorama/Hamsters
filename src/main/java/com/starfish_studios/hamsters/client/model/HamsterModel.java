@@ -86,24 +86,11 @@ public class HamsterModel extends DefaultedEntityGeoModel<Hamster> {
 
         if (!hamster.isBaby()) sleep.setHidden(!hamster.isSleeping());
 
-        float adultHeadScale = 1.0F;
-        float babyHeadScale = 1.4F;
+        float headScale = hamster.isBaby() ? 1.4F : 1.0F;
+        if (hamster.isBaby()) head.setPosY(0.0F);
 
-        if (hamster.isBaby()) {
-
-            head.setScaleX(babyHeadScale);
-            head.setScaleY(babyHeadScale);
-            head.setScaleZ(babyHeadScale);
-
-        } else {
-
-            // Setting values to 1.0F here prevents conflicts with GeckoLib and optimization mods.
-            // Without this, adult heads will also size up. It's a bug :(
-
-            head.setPosY(0.0F);
-            head.setScaleX(adultHeadScale);
-            head.setScaleY(adultHeadScale);
-            head.setScaleZ(adultHeadScale);
-        }
+        head.setScaleX(headScale);
+        head.setScaleY(headScale);
+        head.setScaleZ(headScale);
     }
 }
