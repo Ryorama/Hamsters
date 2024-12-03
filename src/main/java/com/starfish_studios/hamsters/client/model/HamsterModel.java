@@ -42,7 +42,7 @@ public class HamsterModel extends DefaultedEntityGeoModel<Hamster> {
 
     @Override
     public ResourceLocation getAnimationResource(Hamster hamster) {
-        return Hamsters.id("animations/hamster.animation.json");
+        return Hamsters.id("animations/hamster.rp_anim.json");
     }
 
     @Override
@@ -55,8 +55,8 @@ public class HamsterModel extends DefaultedEntityGeoModel<Hamster> {
         CoreGeoBone head = this.getAnimationProcessor().getBone("head");
         CoreGeoBone sleep = this.getAnimationProcessor().getBone("sleep");
         CoreGeoBone cheeks = this.getAnimationProcessor().getBone("cheeks");
-        CoreGeoBone leftCheek = this.getAnimationProcessor().getBone("leftCheek");
-        CoreGeoBone rightCheek = this.getAnimationProcessor().getBone("rightCheek");
+        CoreGeoBone leftCheek = this.getAnimationProcessor().getBone("left_cheek");
+        CoreGeoBone rightCheek = this.getAnimationProcessor().getBone("right_cheek");
 
         cheeks.setHidden(hamster.getMainHandItem().isEmpty());
         float cheekDefaultScale = 1.0F;

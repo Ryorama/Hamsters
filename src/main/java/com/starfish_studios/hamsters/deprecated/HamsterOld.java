@@ -64,11 +64,11 @@ import static com.starfish_studios.hamsters.blocks.HamsterWheelBlock.FACING;
 
 public class HamsterOld extends TamableAnimal implements GeoEntity {
     // region
-    protected static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.sf_nba.hamster.idle");
-    protected static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.sf_nba.hamster.walk");
-    protected static final RawAnimation RUN = RawAnimation.begin().thenLoop("animation.sf_nba.hamster.run");
-    protected static final RawAnimation SLEEP = RawAnimation.begin().thenLoop("animation.sf_nba.hamster.sleep");
-    protected static final RawAnimation STANDING = RawAnimation.begin().thenLoop("animation.sf_nba.hamster.standing");
+    protected static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.idle");
+    protected static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.walk");
+    protected static final RawAnimation RUN = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.run");
+    protected static final RawAnimation SLEEP = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.sleep");
+    protected static final RawAnimation STANDING = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.standing");
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
 
     private static final EntityDataAccessor<Integer> EAT_COUNTER = SynchedEntityData.defineId(HamsterOld.class, EntityDataSerializers.INT);

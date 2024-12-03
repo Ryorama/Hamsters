@@ -70,6 +70,14 @@ import java.util.*;
 import static com.starfish_studios.hamsters.HamstersConfig.*;
 
 public class Hamster extends TamableAnimal implements GeoEntity, SleepingAnimal {
+    protected static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.idle");
+    protected static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.walk");
+    protected static final RawAnimation RUN = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.run");
+    protected static final RawAnimation SLEEP = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.sleep");
+    protected static final RawAnimation STANDING = RawAnimation.begin().thenLoop("animation.sf_hba.hamster.standing");
+    protected static final RawAnimation SQUISH = RawAnimation.begin().thenPlay("animation.sf_hba.hamster.squish").thenPlayXTimes("animation.sf_hba.hamster.squished", 4).thenPlay("animation.sf_hba.hamster.unsquish");
+    private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
+
 
     // region Initialization
 
@@ -424,21 +432,9 @@ public class Hamster extends TamableAnimal implements GeoEntity, SleepingAnimal 
 
     // region GeckoLib
 
-    private static final String animationLocationString = "animation.sf_hba.hamster.";
-
-    private static final RawAnimation
-        IDLE = RawAnimation.begin().thenLoop(animationLocationString + "idle"),
-        WALK = RawAnimation.begin().thenLoop(animationLocationString + "walk"),
-        PINKIE_WALK = RawAnimation.begin().thenLoop(animationLocationString + "pinkie_walk"),
-        RUN = RawAnimation.begin().thenLoop(animationLocationString + "run"),
-        STANDING = RawAnimation.begin().thenLoop(animationLocationString + "standing"),
-        SLEEP = RawAnimation.begin().thenLoop(animationLocationString + "sleep"),
-        SQUISH = RawAnimation.begin().thenPlay(animationLocationString + "squish").thenPlayXTimes(animationLocationString + "squished", 5).thenPlay(animationLocationString + "unsquish")
-    ;
-
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return GeckoLibUtil.createInstanceCache(this);
+        return geoCache;
     }
 
     @Override
@@ -448,8 +444,6 @@ public class Hamster extends TamableAnimal implements GeoEntity, SleepingAnimal 
 
     private <E extends Hamster> PlayState animController(final AnimationState<E> event) {
 
-        float animationSpeed = 1.0F;
-
         if (this.getSquishedTicks() > 0) { // Squished Animation
             event.setAnimation(SQUISH);
         } else if (this.isSleeping()) { // Sleeping Animation
@@ -458,20 +452,16 @@ public class Hamster extends TamableAnimal implements GeoEntity, SleepingAnimal 
             event.setAnimation(STANDING);
         } else if (event.isMoving()) { // Moving Animations
             if (this.isSprinting()) {
-                animationSpeed = 1.3F;
                 event.setAnimation(RUN);
             } else {
-                animationSpeed = this.isBaby() ? 1.1F : 1.1F * event.getLimbSwingAmount();
-                event.setAnimation(this.isBaby() ? PINKIE_WALK : WALK);
+                event.setAnimation(WALK);
             }
         } else if (this.isInWheel()) { // Wheel Animation
-            animationSpeed = 1.4F;
-            event.setAnimation(WALK);
+            event.setAnimation(RUN);
         } else { // Idle Animation
             event.setAnimation(IDLE);
         }
 
-        event.setControllerSpeed(animationSpeed);
         return PlayState.CONTINUE;
     }
 
