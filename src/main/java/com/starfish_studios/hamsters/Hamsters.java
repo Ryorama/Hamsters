@@ -34,5 +34,6 @@ public class Hamsters implements ModInitializer {
 		);
 
 		HamstersVanillaIntegration.serverInit();
+		HamstersCreativeModeTabs.addToVanillaCreativeTabs();
 	}
 }

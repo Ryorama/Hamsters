@@ -33,22 +33,22 @@ public class HamstersItems {
     public static final Item CHOCOLATE_HAMSTER = register("chocolate_hamster", new ChocolateHamsterItem(new FabricItemSettings().stacksTo(1)
     .food(new FoodProperties.Builder().nutrition(2).saturationMod(0.1F).build())));
 
+    public static final Item WHITE_HAMSTER_BALL = register("white_hamster_ball", hamsterBallItem());
+    public static final Item LIGHT_GRAY_HAMSTER_BALL = register("light_gray_hamster_ball", hamsterBallItem());
+    public static final Item GRAY_HAMSTER_BALL = register("gray_hamster_ball", hamsterBallItem());
+    public static final Item BLACK_HAMSTER_BALL = register("black_hamster_ball", hamsterBallItem());
+    public static final Item BROWN_HAMSTER_BALL = register("brown_hamster_ball", hamsterBallItem());
     public static final Item RED_HAMSTER_BALL = register("red_hamster_ball", hamsterBallItem());
     public static final Item ORANGE_HAMSTER_BALL = register("orange_hamster_ball", hamsterBallItem());
     public static final Item YELLOW_HAMSTER_BALL = register("yellow_hamster_ball", hamsterBallItem());
     public static final Item LIME_HAMSTER_BALL = register("lime_hamster_ball", hamsterBallItem());
     public static final Item GREEN_HAMSTER_BALL = register("green_hamster_ball", hamsterBallItem());
     public static final Item CYAN_HAMSTER_BALL = register("cyan_hamster_ball", hamsterBallItem());
-    public static final Item BLUE_HAMSTER_BALL = register("blue_hamster_ball", hamsterBallItem());
     public static final Item LIGHT_BLUE_HAMSTER_BALL = register("light_blue_hamster_ball", hamsterBallItem());
-    public static final Item PINK_HAMSTER_BALL = register("pink_hamster_ball", hamsterBallItem());
-    public static final Item MAGENTA_HAMSTER_BALL = register("magenta_hamster_ball", hamsterBallItem());
+    public static final Item BLUE_HAMSTER_BALL = register("blue_hamster_ball", hamsterBallItem());
     public static final Item PURPLE_HAMSTER_BALL = register("purple_hamster_ball", hamsterBallItem());
-    public static final Item WHITE_HAMSTER_BALL = register("white_hamster_ball", hamsterBallItem());
-    public static final Item LIGHT_GRAY_HAMSTER_BALL = register("light_gray_hamster_ball", hamsterBallItem());
-    public static final Item GRAY_HAMSTER_BALL = register("gray_hamster_ball", hamsterBallItem());
-    public static final Item BLACK_HAMSTER_BALL = register("black_hamster_ball", hamsterBallItem());
-    public static final Item BROWN_HAMSTER_BALL = register("brown_hamster_ball", hamsterBallItem());
+    public static final Item MAGENTA_HAMSTER_BALL = register("magenta_hamster_ball", hamsterBallItem());
+    public static final Item PINK_HAMSTER_BALL = register("pink_hamster_ball", hamsterBallItem());
 
     public static final Item HAMSTER_WHEEL = register("hamster_wheel", new HamsterWheelItem(HamstersBlocks.HAMSTER_WHEEL, new FabricItemSettings()));
 

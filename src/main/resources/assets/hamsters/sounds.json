@@ -75,5 +75,17 @@
 			"minecraft:mob/chicken/plop"
 		],
 		"subtitle": "hamsters.subtitles.hamster.unsquish"
+	},
+	"entity.hamster.pick_up": {
+		"sounds": [
+			"minecraft:random/pop"
+		],
+		"subtitle": "hamsters.subtitles.hamster.pick_up"
+	},
+	"entity.hamster.place": {
+		"sounds": [
+			"minecraft:mob/chicken/plop"
+		],
+		"subtitle": "hamsters.subtitles.hamster.place"
 	}
 }

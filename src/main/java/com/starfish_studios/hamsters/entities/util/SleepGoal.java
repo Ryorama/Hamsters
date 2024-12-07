@@ -40,6 +40,7 @@ public class SleepGoal<E extends PathfinderMob & SleepingAnimal> extends Goal {
 
     @Override
     public void stop() {
-        this.mob.setSleeping(false); // Wakes up the mob when the goal ends
+        this.mob.getNavigation().stop();
+        super.stop();
     }
 }

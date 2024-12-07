@@ -81,7 +81,7 @@ public class HamsterBall extends LivingEntity implements HamstersGeoEntity {
         if (gameTime - this.lastHit <= 5L || damageSource.getDirectEntity() instanceof AbstractArrow) {
             this.breakHamsterBall();
         } else {
-            this.knockback(0.4F, Objects.requireNonNull(damageSource.getSourcePosition()).x() - this.getX(), Objects.requireNonNull(damageSource.getSourcePosition()).z() - this.getZ());
+            if (damageSource.getSourcePosition() != null) this.knockback(0.4F, Objects.requireNonNull(damageSource.getSourcePosition()).x() - this.getX(), Objects.requireNonNull(damageSource.getSourcePosition()).z() - this.getZ());
             this.level().broadcastEntityEvent(this, (byte) 32);
             this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
             this.lastHit = gameTime;
@@ -157,7 +157,7 @@ public class HamsterBall extends LivingEntity implements HamstersGeoEntity {
 
     @Override
     public ItemStack getPickResult() {
-        return new ItemStack(HamstersItems.LIGHT_BLUE_HAMSTER_BALL);
+        return new ItemStack(HamstersItems.WHITE_HAMSTER_BALL);
     }
 
     @Override

@@ -108,6 +108,8 @@
   "hamsters.subtitles.hamster.sleep": "Hamster sleeps",
   "hamsters.subtitles.hamster.squish": "Hamster squishes",
   "hamsters.subtitles.hamster.unsquish": "Hamster pops up",
+  "hamsters.subtitles.hamster.pick_up": "Hamster picked up",
+  "hamsters.subtitles.hamster.place": "Hamster placed",
 
   "advancements.chocolate_hamster.title": "Sweet & Sinister",
   "advancements.chocolate_hamster.description": "Obtain a Chocolate Hamster",

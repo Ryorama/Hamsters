@@ -19,6 +19,8 @@ public class HamstersSoundEvents {
     public static final SoundEvent HAMSTER_SLEEP = registerSoundEvent("entity.hamster.sleep");
     public static final SoundEvent HAMSTER_SQUISH = registerSoundEvent("entity.hamster.squish");
     public static final SoundEvent HAMSTER_UNSQUISH = registerSoundEvent("entity.hamster.unsquish");
+    public static final SoundEvent HAMSTER_PICK_UP = registerSoundEvent("entity.hamster.pick_up");
+    public static final SoundEvent HAMSTER_PLACE = registerSoundEvent("entity.hamster.place");
 
     private static SoundType registerBlockSoundType(String name, float volume, float pitch) {
 

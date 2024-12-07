@@ -3,12 +3,12 @@ package com.starfish_studios.hamsters.items;
 import com.starfish_studios.hamsters.Hamsters;
 import com.starfish_studios.hamsters.entities.Hamster;
 import com.starfish_studios.hamsters.registry.HamstersEntityTypes;
+import com.starfish_studios.hamsters.registry.HamstersSoundEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -47,7 +47,7 @@ public class HamsterItem extends Item {
         hamster.setOwnerUUID(player.getUUID());
         level.addFreshEntity(hamster);
 
-        hamster.playSound(SoundEvents.CHICKEN_EGG);
+        hamster.playSound(HamstersSoundEvents.HAMSTER_PLACE);
         hamster.gameEvent(GameEvent.ENTITY_PLACE, useOnContext.getPlayer());
 
         if (!player.getAbilities().instabuild) player.setItemInHand(useOnContext.getHand(), ItemStack.EMPTY);
