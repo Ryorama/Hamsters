@@ -1,6 +1,5 @@
-package com.starfish_studios.hamsters.entities.util;
+package com.starfish_studios.hamsters.deprecated;
 
-import com.starfish_studios.hamsters.deprecated.HamsterOld;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;

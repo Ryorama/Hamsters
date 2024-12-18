@@ -7,9 +7,6 @@
 
   "item.hamsters.hamster_spawn_egg": "Hamster Spawn Egg",
 
-  "tooltip.hamsters.tamed": "Tamed",
-  "tooltip.hamsters.baby": "Baby",
-
   "tooltip.hamsters.white": "White",
   "tooltip.hamsters.cream": "Cream",
   "tooltip.hamsters.champagne": "Champagne",
@@ -23,6 +20,8 @@
   "tooltip.hamsters.spotted": "Spotted",
   "tooltip.hamsters.roan": "Roan",
   "tooltip.hamsters.whitebelly": "Whitebelly",
+
+  "tooltip.hamsters.baby": "Baby",
 
   "item.hamsters.red_hamster_ball": "Red Hamster Ball",
   "item.hamsters.orange_hamster_ball": "Orange Hamster Ball",

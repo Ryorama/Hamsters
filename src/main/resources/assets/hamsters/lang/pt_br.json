@@ -3,9 +3,6 @@
 
   "item.hamsters.hamster_spawn_egg": "Ovo gerador de Hamster",
 
-  "tooltip.hamsters.tamed": "Domesticado",
-  "tooltip.hamsters.baby": "Filhote",
-
   "tooltip.hamsters.white": "Branco",
   "tooltip.hamsters.cream": "Pêssego e Creme",
   "tooltip.hamsters.champagne": "Laranja",
@@ -13,6 +10,8 @@
   "tooltip.hamsters.dove": "Marrom",
   "tooltip.hamsters.chocolate": "Preto e Branco",
   "tooltip.hamsters.black": "Preto",
+
+  "tooltip.hamsters.baby": "Filhote",
 
   "block.hamsters.hamster_wheel": "Roda de hamster",
   "block.hamsters.tunnel": "Túnel",

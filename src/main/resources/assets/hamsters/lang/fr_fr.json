@@ -1,9 +1,6 @@
 {
   "item.hamsters.hamster_spawn_egg": "Oeuf d'apparition de hamster",
 
-  "tooltip.hamsters.tamed": "Apprivoisé",
-  "tooltip.hamsters.baby": "Bébé",
-
   "tooltip.hamsters.white": "Blanc",
   "tooltip.hamsters.cream": "Pêches et crème",
   "tooltip.hamsters.champagne": "Orange",
@@ -11,6 +8,8 @@
   "tooltip.hamsters.dove": "Marron",
   "tooltip.hamsters.chocolate": "Noir et blanc",
   "tooltip.hamsters.black": "Noir",
+
+  "tooltip.hamsters.baby": "Bébé",
 
   "block.hamsters.hamster_wheel": "Roue de hamster",
   "block.hamsters.tunnel": "Tunnel",

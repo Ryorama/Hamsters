@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -31,27 +32,32 @@ public class HamsterItem extends Item {
 
     @Override
     public @NotNull InteractionResult useOn(@NotNull UseOnContext useOnContext) {
+        this.spawnHamster(useOnContext.getLevel(), new BlockPlaceContext(useOnContext).getClickedPos(), useOnContext.getItemInHand(), useOnContext.getPlayer(), null);
+        return InteractionResult.SUCCESS;
+    }
 
-        Level level = useOnContext.getLevel();
-        Player player = useOnContext.getPlayer();
-        BlockPos blockPos = new BlockPlaceContext(useOnContext).getClickedPos();
-        ItemStack itemStack = useOnContext.getItemInHand();
+    public void spawnHamster(Level level, BlockPos blockPos, ItemStack itemStack, Player player, Entity entityToMount) {
 
-        Hamster hamster = HamstersEntityTypes.HAMSTER.create(useOnContext.getLevel());
+        Hamster hamster = HamstersEntityTypes.HAMSTER.create(level);
         assert hamster != null;
 
         if (itemStack.hasCustomHoverName()) hamster.setCustomName(itemStack.getHoverName());
         if (itemStack.hasTag() && itemStack.getTag() != null) hamster.load(itemStack.getTag());
 
         hamster.moveTo(blockPos.getX() + 0.5D, blockPos.getY(), blockPos.getZ() + 0.5D, Objects.requireNonNull(player).getYRot(), 0.0F);
+
+        if (!hamster.isTame()) hamster.setTame(true);
         hamster.setOwnerUUID(player.getUUID());
+        hamster.setOrderedToSit(false);
+        hamster.setInSittingPose(false);
+
+        if (entityToMount != null) hamster.startRiding(entityToMount);
         level.addFreshEntity(hamster);
 
         hamster.playSound(HamstersSoundEvents.HAMSTER_PLACE);
-        hamster.gameEvent(GameEvent.ENTITY_PLACE, useOnContext.getPlayer());
+        hamster.gameEvent(GameEvent.ENTITY_PLACE, player);
 
-        if (!player.getAbilities().instabuild) player.setItemInHand(useOnContext.getHand(), ItemStack.EMPTY);
-        return InteractionResult.SUCCESS;
+        if (!player.getAbilities().instabuild) player.setItemInHand(player.getUsedItemHand(), ItemStack.EMPTY);
     }
 
     @Override
@@ -61,8 +67,8 @@ public class HamsterItem extends Item {
         if (compoundTag == null) return;
 
         String tooltipString = "tooltip." + Hamsters.MOD_ID + ".";
-        String markingTag = "Marking";
-        String variantTag = "Variant";
+        String markingTag = "marking";
+        String variantTag = "variant";
 
         if (compoundTag.contains(markingTag, 3) && compoundTag.getInt(markingTag) != 0) {
             if (compoundTag.contains(variantTag, 3) && compoundTag.getInt(variantTag) == Hamster.Variant.getTypeById(0).getId()) {
@@ -76,6 +82,5 @@ public class HamsterItem extends Item {
 
         if (compoundTag.contains(variantTag, 3)) list.add(Component.translatable(tooltipString + Hamster.Variant.getTypeById(compoundTag.getInt(variantTag)).getName()).withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY));
         if (compoundTag.getInt("Age") < 0) list.add(Component.translatable(tooltipString + "baby").withStyle(ChatFormatting.ITALIC, ChatFormatting.BLUE));
-        if (compoundTag.hasUUID("Owner")) list.add(Component.translatable(tooltipString + "tamed").withStyle(ChatFormatting.ITALIC, ChatFormatting.BLUE));
     }
 }

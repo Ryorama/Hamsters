@@ -11,6 +11,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -20,11 +21,15 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class HamsterBallItem extends Item {
 
-    public HamsterBallItem(Properties properties) {
+    private final DyeColor color;
+
+    public HamsterBallItem(@Nullable DyeColor dyeColor, Properties properties) {
         super(properties);
+        this.color = dyeColor;
     }
 
     @Override
@@ -47,6 +52,7 @@ public class HamsterBallItem extends Item {
 
                     HamsterBall hamsterBall = HamstersEntityTypes.HAMSTER_BALL.create(serverLevel, itemStack.getTag(), EntityType.createDefaultStackConfig(serverLevel, itemStack, useOnContext.getPlayer()), blockPos, MobSpawnType.SPAWN_EGG, true, true);
                     if (hamsterBall == null) return InteractionResult.FAIL;
+                    hamsterBall.setColor(this.color);
 
                     float rotation = (float) Mth.floor((Mth.wrapDegrees(useOnContext.getRotation() - 180.0F) + 22.5F) / 45.0F) * 45.0F;
                     hamsterBall.moveTo(hamsterBall.getX(), hamsterBall.getY(), hamsterBall.getZ(), rotation, 0.0F);

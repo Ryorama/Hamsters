@@ -556,6 +556,7 @@ public class Hamster extends TamableAnimal implements GeoEntity, SleepingAnimal 
 
     public void squishHamster() {
 
+        if (this.getVehicle() != null) return;
         this.setSleeping(false);
 
         if (this.getSquishedTicks() <= 0) {
@@ -589,6 +590,7 @@ public class Hamster extends TamableAnimal implements GeoEntity, SleepingAnimal 
         if (original) {
             this.setSleeping(false);
             this.setOrderedToSit(false);
+            this.setInSittingPose(false);
             this.setDismountingCooldownTicks(200);
         }
 
@@ -597,8 +599,14 @@ public class Hamster extends TamableAnimal implements GeoEntity, SleepingAnimal 
 
     @Override
     public void stopRiding() {
-        this.setSleeping(false);
-        this.setMountingCooldownTicks(200);
+
+        if (!this.level().isClientSide()) {
+            this.setSleeping(false);
+            this.setOrderedToSit(false);
+            this.setInSittingPose(false);
+            this.setMountingCooldownTicks(200);
+        }
+
         super.stopRiding();
     }
 

@@ -24,7 +24,7 @@ public class HamsterBallModel extends DefaultedEntityGeoModel<HamsterBall> {
 
     @Override
     public ResourceLocation getTextureResource(HamsterBall hamsterBall) {
-        return Hamsters.id("textures/entity/ball/blue.png");
+        return Hamsters.id("textures/entity/hamster_ball/" + hamsterBall.getColor().getName() + ".png");
     }
 
     @Override

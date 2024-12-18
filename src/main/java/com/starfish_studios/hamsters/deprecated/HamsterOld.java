@@ -7,7 +7,6 @@ package com.starfish_studios.hamsters.deprecated;
 
 import com.starfish_studios.hamsters.blocks.HamsterWheelBlock;
 import com.starfish_studios.hamsters.entities.SeatEntity;
-import com.starfish_studios.hamsters.entities.util.SearchForItemsGoal;
 import com.starfish_studios.hamsters.registry.*;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
