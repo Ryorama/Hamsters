@@ -236,7 +236,6 @@
 			}
 		},
 		"animation.sf_hba.hamster.squish": {
-			"loop": "hold_on_last_frame",
 			"animation_length": 0.4,
 			"bones": {
 				"root": {
@@ -437,8 +436,7 @@
 			}
 		},
 		"animation.sf_hba.hamster.squished": {
-			"loop": true,
-			"animation_length": 1,
+			"animation_length": 2.75,
 			"bones": {
 				"root": {
 					"scale": [1.3, 0.4, 1.2]
@@ -470,7 +468,6 @@
 			}
 		},
 		"animation.sf_hba.hamster.unsquish": {
-			"loop": "hold_on_last_frame",
 			"animation_length": 0.25,
 			"bones": {
 				"root": {
