@@ -3,6 +3,7 @@ package com.starfish_studios.hamsters.client.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.starfish_studios.hamsters.client.model.HamsterBallModel;
+import com.starfish_studios.hamsters.client.renderer.layers.HamsterInBallLayer;
 import com.starfish_studios.hamsters.entities.HamsterBall;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,8 +15,12 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 @Environment(EnvType.CLIENT)
 public class HamsterBallRenderer extends GeoEntityRenderer<HamsterBall> {
 
+    private final EntityRendererProvider.Context renderManager;
+
     public HamsterBallRenderer(EntityRendererProvider.Context renderManager) {
         super(renderManager, new HamsterBallModel());
+        this.renderManager = renderManager;
+        this.addRenderLayer(new HamsterInBallLayer(this, renderManager));
     }
 
     @Override
