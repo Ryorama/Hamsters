@@ -14,12 +14,13 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 @Environment(EnvType.CLIENT)
 public class HamsterRenderer extends GeoEntityRenderer<Hamster> {
+    private final EntityRendererProvider.Context context;
 
     public HamsterRenderer(EntityRendererProvider.Context context) {
 
         super(context, new HamsterModel());
         this.shadowRadius = 0.3F;
-
+        this.context= context;
         this.addRenderLayer(new HamsterMarkingLayer(this));
         this.addRenderLayer(new HamsterCollarLayer(this));
     }
