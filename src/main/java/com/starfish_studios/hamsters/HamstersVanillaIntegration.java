@@ -33,7 +33,7 @@ public class HamstersVanillaIntegration {
 
         private static void registerEntityModelLayers() {
             EntityRendererRegistry.register(HamstersEntityTypes.HAMSTER, HamsterRenderer::new);
-            EntityRendererRegistry.register(HamstersEntityTypes.HAMSTER_BALL, HamsterBallRenderer::new);
+//            EntityRendererRegistry.register(HamstersEntityTypes.HAMSTER_BALL, HamsterBallRenderer::new);
         }
 
         private static void registerEntityRenderers() {

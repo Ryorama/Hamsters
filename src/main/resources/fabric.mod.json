@@ -4,9 +4,9 @@
 	"version": "${version}",
 	"name": "Hamsters",
 
-	"description": "Introducing small, fluffy, and adorable hamsters to Minecraft!",
+	"description": "Hamsters - what more could you possibly wish for?",
 	"authors": [
-		"Starfish Studios, Ninni, crispytwig, Sydokiddo"
+		"Starfish Studios"
 	],
 	"contact": {
 		"homepage": "https://www.curseforge.com/minecraft/mc-mods/hamsters",

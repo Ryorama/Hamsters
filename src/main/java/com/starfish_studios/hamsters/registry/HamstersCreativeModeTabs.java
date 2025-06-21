@@ -18,7 +18,7 @@ public class HamstersCreativeModeTabs {
     public static final CreativeModeTab ITEM_GROUP = register("item_group", FabricItemGroup.builder().icon(HAMSTER::getDefaultInstance).title(Component.translatable("mod.hamsters")).displayItems((featureFlagSet, output) -> {
 
         output.accept(HAMSTER);
-        output.accept(SEED_MIX);
+//        output.accept(SEED_MIX);
         output.accept(HAMSTER_SPAWN_EGG);
 
         output.accept(HamstersItems.HAMSTER_WHEEL);
@@ -75,22 +75,22 @@ public class HamstersCreativeModeTabs {
         output.accept(MAGENTA_HAMSTER_BOTTLE);
         output.accept(PINK_HAMSTER_BOTTLE);
 
-        output.accept(WHITE_HAMSTER_BALL);
-        output.accept(LIGHT_GRAY_HAMSTER_BALL);
-        output.accept(GRAY_HAMSTER_BALL);
-        output.accept(BLACK_HAMSTER_BALL);
-        output.accept(BROWN_HAMSTER_BALL);
-        output.accept(RED_HAMSTER_BALL);
-        output.accept(ORANGE_HAMSTER_BALL);
-        output.accept(YELLOW_HAMSTER_BALL);
-        output.accept(LIME_HAMSTER_BALL);
-        output.accept(GREEN_HAMSTER_BALL);
-        output.accept(CYAN_HAMSTER_BALL);
-        output.accept(LIGHT_BLUE_HAMSTER_BALL);
-        output.accept(BLUE_HAMSTER_BALL);
-        output.accept(PURPLE_HAMSTER_BALL);
-        output.accept(MAGENTA_HAMSTER_BALL);
-        output.accept(PINK_HAMSTER_BALL);
+//        output.accept(WHITE_HAMSTER_BALL);
+//        output.accept(LIGHT_GRAY_HAMSTER_BALL);
+//        output.accept(GRAY_HAMSTER_BALL);
+//        output.accept(BLACK_HAMSTER_BALL);
+//        output.accept(BROWN_HAMSTER_BALL);
+//        output.accept(RED_HAMSTER_BALL);
+//        output.accept(ORANGE_HAMSTER_BALL);
+//        output.accept(YELLOW_HAMSTER_BALL);
+//        output.accept(LIME_HAMSTER_BALL);
+//        output.accept(GREEN_HAMSTER_BALL);
+//        output.accept(CYAN_HAMSTER_BALL);
+//        output.accept(LIGHT_BLUE_HAMSTER_BALL);
+//        output.accept(BLUE_HAMSTER_BALL);
+//        output.accept(PURPLE_HAMSTER_BALL);
+//        output.accept(MAGENTA_HAMSTER_BALL);
+//        output.accept(PINK_HAMSTER_BALL);
 
         }).build()
     );
@@ -132,17 +132,17 @@ public class HamstersCreativeModeTabs {
             entries.addAfter(Items.LIGHTNING_ROD, HamstersItems.HAMSTER_WHEEL)
         );
 
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries ->
-            entries.addAfter(Items.TNT_MINECART,
+//        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries ->
+//            entries.addAfter(Items.TNT_MINECART,
+//
+//            WHITE_HAMSTER_BALL, LIGHT_GRAY_HAMSTER_BALL, GRAY_HAMSTER_BALL, BLACK_HAMSTER_BALL, BROWN_HAMSTER_BALL,
+//            RED_HAMSTER_BALL, ORANGE_HAMSTER_BALL, YELLOW_HAMSTER_BALL, LIME_HAMSTER_BALL, GREEN_HAMSTER_BALL, CYAN_HAMSTER_BALL,
+//            LIGHT_BLUE_HAMSTER_BALL, BLUE_HAMSTER_BALL, PURPLE_HAMSTER_BALL, MAGENTA_HAMSTER_BALL, PINK_HAMSTER_BALL)
+//        );
 
-            WHITE_HAMSTER_BALL, LIGHT_GRAY_HAMSTER_BALL, GRAY_HAMSTER_BALL, BLACK_HAMSTER_BALL, BROWN_HAMSTER_BALL,
-            RED_HAMSTER_BALL, ORANGE_HAMSTER_BALL, YELLOW_HAMSTER_BALL, LIME_HAMSTER_BALL, GREEN_HAMSTER_BALL, CYAN_HAMSTER_BALL,
-            LIGHT_BLUE_HAMSTER_BALL, BLUE_HAMSTER_BALL, PURPLE_HAMSTER_BALL, MAGENTA_HAMSTER_BALL, PINK_HAMSTER_BALL)
-        );
-
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS).register(entries ->
-            entries.addAfter(Items.WHEAT, SEED_MIX)
-        );
+//        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS).register(entries ->
+//            entries.addAfter(Items.WHEAT, SEED_MIX)
+//        );
 
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.SPAWN_EGGS).register(entries ->
             entries.addBefore(Items.HOGLIN_SPAWN_EGG, HAMSTER_SPAWN_EGG)
